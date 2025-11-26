@@ -18,12 +18,16 @@ public enum RecordingAction
     Resume,
     /// <summary>Get recording status</summary>
     GetStatus,
-    /// <summary>Get recording settings (format, quality, encoder)</summary>
+    /// <summary>Get recording settings (format, quality, encoder, path)</summary>
     GetSettings,
     /// <summary>Set recording format (mp4, mkv, etc.)</summary>
     SetFormat,
     /// <summary>Set recording quality preset</summary>
-    SetQuality
+    SetQuality,
+    /// <summary>Set recording output directory</summary>
+    SetPath,
+    /// <summary>Get current recording output directory</summary>
+    GetPath
 }
 
 /// <summary>
@@ -36,26 +40,35 @@ public static class ObsRecordingTool
     [Description(@"Control OBS recording.
 
 Actions:
-- Start: Start recording (ensure a capture source exists first!)
+- Start: Start recording. Use 'path' parameter to set output directory (e.g., path='C:/Videos')
 - Stop: Stop recording and save the file
 - Pause: Pause the current recording
 - Resume: Resume a paused recording
 - GetStatus: Get recording status (active, paused, timecode)
-- GetSettings: Get recording format, quality, and encoder
+- GetSettings: Get recording format, quality, encoder, and output path
 - SetFormat: Set recording format (mp4, mkv, flv, mov, ts)
 - SetQuality: Set recording quality (Stream, Small, HQ, Lossless)
+- SetPath: Set recording output directory (e.g., path='C:/Videos')
+- GetPath: Get current recording output directory
 
-IMPORTANT: Before starting a recording, add a capture source using obs_source with action=AddWindowCapture to avoid a BLACK SCREEN.")]
+OUTPUT PATH: Use 'path' parameter with Start or SetPath to control where recordings are saved.
+Example: obs_recording(action: Start, path: 'D:/MyRecordings')
+
+AUDIO: By default, audio is MUTED when starting. Set muteAudio=false to include audio.
+
+IMPORTANT: Add a capture source first using obs_source to avoid BLACK SCREEN recordings.")]
     public static string Recording(
-        [Description("Action to perform: Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality")] RecordingAction action,
+        [Description("Action to perform: Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality, SetPath, GetPath")] RecordingAction action,
         [Description("Recording format for SetFormat action: mp4 (recommended), mkv, flv, mov, ts")] string? format = null,
-        [Description("Quality preset for SetQuality action: Stream, Small, HQ (recommended), Lossless")] string? quality = null)
+        [Description("Quality preset for SetQuality action: Stream, Small, HQ (recommended), Lossless")] string? quality = null,
+        [Description("Output directory path for Start or SetPath actions. Example: 'C:/Videos' or 'D:/Recordings'")] string? path = null,
+        [Description("Mute audio when starting recording. Default: true (audio muted). Set to false to record with audio.")] bool muteAudio = true)
     {
         try
         {
             return action switch
             {
-                RecordingAction.Start => DoStart(),
+                RecordingAction.Start => DoStart(muteAudio, path),
                 RecordingAction.Stop => DoStop(),
                 RecordingAction.Pause => DoPause(),
                 RecordingAction.Resume => DoResume(),
@@ -63,6 +76,8 @@ IMPORTANT: Before starting a recording, add a capture source using obs_source wi
                 RecordingAction.GetSettings => DoGetSettings(),
                 RecordingAction.SetFormat => DoSetFormat(format),
                 RecordingAction.SetQuality => DoSetQuality(quality),
+                RecordingAction.SetPath => DoSetPath(path),
+                RecordingAction.GetPath => DoGetPath(),
                 _ => $"Error: Unknown action '{action}'"
             };
         }
@@ -72,11 +87,32 @@ IMPORTANT: Before starting a recording, add a capture source using obs_source wi
         }
     }
 
-    private static string DoStart()
+    private static string DoStart(bool muteAudio, string? path)
     {
         var client = ObsConnectionTool.GetClient();
+        var audioStatus = "";
+        var pathStatus = "";
+
+        // Set recording path if specified
+        if (!string.IsNullOrEmpty(path))
+        {
+            client.SetRecordingDirectory(path);
+            pathStatus = $" Output: {path}";
+        }
+
+        if (muteAudio)
+        {
+            // Mute all audio inputs before recording
+            var inputs = client.GetSpecialInputs();
+            foreach (var input in inputs)
+            {
+                client.SetInputMute(input.Name, true);
+            }
+            audioStatus = inputs.Count > 0 ? " Audio muted." : "";
+        }
+
         client.StartRecording();
-        return "Recording started. Use obs_recording with action=Stop when finished.";
+        return $"Recording started.{audioStatus}{pathStatus} Use obs_recording with action=Stop when finished.";
     }
 
     private static string DoStop()
@@ -115,11 +151,32 @@ IMPORTANT: Before starting a recording, add a capture source using obs_source wi
     {
         var client = ObsConnectionTool.GetClient();
         var settings = client.GetRecordingSettings();
+        var directory = client.GetRecordingDirectory();
 
         return $"Recording Settings:\n" +
                $"Format: {settings.Format}\n" +
                $"Quality: {settings.Quality}\n" +
-               $"Encoder: {settings.Encoder}";
+               $"Encoder: {settings.Encoder}\n" +
+               $"Path: {directory}";
+    }
+
+    private static string DoSetPath(string? path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return "Error: path parameter is required for SetPath action";
+        }
+
+        var client = ObsConnectionTool.GetClient();
+        client.SetRecordingDirectory(path);
+        return $"Recording output directory set to: {path}";
+    }
+
+    private static string DoGetPath()
+    {
+        var client = ObsConnectionTool.GetClient();
+        var directory = client.GetRecordingDirectory();
+        return $"Recording output directory: {directory}";
     }
 
     private static string DoSetFormat(string? format)

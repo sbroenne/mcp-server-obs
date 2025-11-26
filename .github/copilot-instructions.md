@@ -11,7 +11,7 @@ mcp-server-obs/
 ├── src/ObsMcp.McpServer/       # .NET 8 MCP Server (main codebase)
 │   ├── Program.cs              # Entry point with server instructions
 │   ├── ObsClient.cs            # OBS WebSocket client wrapper
-│   └── Tools/                  # 6 MCP tools with action enums
+│   └── Tools/                  # 7 MCP tools with action enums
 ├── tests/ObsMcp.McpServer.Tests/  # Unit & integration tests
 ├── vscode-extension/           # VS Code extension (TypeScript)
 │   └── src/extension.ts        # Registers MCP server with VS Code
@@ -37,7 +37,10 @@ Tools follow the **resource + action enum** pattern (like mcp-server-excel):
 | `obs_streaming` | Start, Stop, GetStatus |
 | `obs_scene` | List, GetCurrent, Set, ListSources |
 | `obs_source` | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
+| `obs_audio` | GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll |
 | `obs_media` | TakeScreenshot, StartVirtualCamera, StopVirtualCamera |
+
+**Audio Note:** Recording starts with audio MUTED by default. Use `muteAudio=false` to include audio.
 
 Each tool file contains:
 - An `enum` for actions (e.g., `ConnectionAction`)

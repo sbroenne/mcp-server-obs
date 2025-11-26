@@ -25,14 +25,21 @@ builder.Services
 
             This server controls OBS Studio for screen recording and streaming.
             
-            ## Available Tools (6 resource-based tools with actions)
+            ## Available Tools (7 resource-based tools with actions)
             
             - `obs_connection` - Connect, Disconnect, GetStatus, GetStats
-            - `obs_recording` - Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality
+            - `obs_recording` - Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality, SetPath, GetPath
             - `obs_streaming` - Start, Stop, GetStatus
             - `obs_scene` - List, GetCurrent, Set, ListSources
             - `obs_source` - AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled
+            - `obs_audio` - GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll
             - `obs_media` - TakeScreenshot, StartVirtualCamera, StopVirtualCamera
+            
+            ## IMPORTANT: Audio is MUTED by Default
+            
+            When starting a recording, audio is automatically muted (for screen capture scenarios).
+            Use `obs_recording(action: Start, muteAudio: false)` to record WITH audio.
+            Use `obs_audio` tool to manage audio inputs (desktop audio, mic) manually.
             
             ## IMPORTANT: Black Screen Prevention
             
@@ -63,8 +70,9 @@ builder.Services
                - Use `obs_source(action: SetWindowCapture, sourceName: "Window Capture", windowValue: "...")`
                - Use the exact "value" string from the window list
             
-            5. **Start recording**:
-               - Use `obs_recording(action: Start)` to begin capturing the selected window
+            5. **Start recording** (audio muted by default):
+               - Use `obs_recording(action: Start)` to begin capturing (audio muted)
+               - Use `obs_recording(action: Start, muteAudio: false)` to include audio
             
             ### Example Workflow
             
@@ -74,8 +82,15 @@ builder.Services
             3. obs_source(action: ListWindows, sourceName: "My Capture")
                -> Returns: Visual Studio Code (value: "Code.exe:Chrome_WidgetWin_1:Code.exe")
             4. obs_source(action: SetWindowCapture, sourceName: "My Capture", windowValue: "Code.exe:Chrome_WidgetWin_1:Code.exe")
-            5. obs_recording(action: Start)
+            5. obs_recording(action: Start)  # Audio muted by default
             ```
+            
+            ## Audio Control
+            
+            - `obs_audio(action: GetInputs)` - List audio inputs (Desktop Audio, Mic/Aux)
+            - `obs_audio(action: MuteAll)` / `obs_audio(action: UnmuteAll)` - Mute/unmute all
+            - `obs_audio(action: Mute, inputName: "Desktop Audio")` - Mute specific input
+            - `obs_audio(action: SetVolume, inputName: "Mic/Aux", volume: 0.5)` - Set volume (0.0-1.0)
             
             ## Display Capture (Alternative)
             
@@ -90,16 +105,19 @@ builder.Services
             
             ## Recording Settings
             
-            - `obs_recording(action: GetSettings)` - View current format, quality, encoder
+            - `obs_recording(action: GetSettings)` - View current format, quality, encoder, and path
             - `obs_recording(action: SetFormat, format: "mp4")` - Change format (mp4, mkv, mov, flv, ts)
             - `obs_recording(action: SetQuality, quality: "HQ")` - Change quality preset
+            - `obs_recording(action: SetPath, path: "C:/Videos")` - Change output directory
+            - `obs_recording(action: GetPath)` - View current output directory
             
             ## Key Guidelines
             
             1. Always check connection status before operations
             2. Always add a capture source before recording
             3. For window capture, always list windows and let user choose
-            4. Use window capture for specific apps
+            4. Audio is muted by default - use muteAudio=false if needed
+            5. Use window capture for specific apps
             """;
     })
     .WithStdioServerTransport()

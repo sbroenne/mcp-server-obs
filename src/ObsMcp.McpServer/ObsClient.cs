@@ -293,6 +293,61 @@ public class ObsClient : IDisposable
         };
     }
 
+    // Audio operations
+    public List<ObsAudioInput> GetSpecialInputs()
+    {
+        var inputs = new List<ObsAudioInput>();
+        var specialInputs = _obs.GetSpecialInputs();
+
+        if (specialInputs.TryGetValue("desktop1", out var desktop1) && !string.IsNullOrEmpty(desktop1))
+        {
+            inputs.Add(new ObsAudioInput { Name = desktop1, Kind = "Desktop Audio" });
+        }
+        if (specialInputs.TryGetValue("desktop2", out var desktop2) && !string.IsNullOrEmpty(desktop2))
+        {
+            inputs.Add(new ObsAudioInput { Name = desktop2, Kind = "Desktop Audio 2" });
+        }
+        if (specialInputs.TryGetValue("mic1", out var mic1) && !string.IsNullOrEmpty(mic1))
+        {
+            inputs.Add(new ObsAudioInput { Name = mic1, Kind = "Mic/Aux" });
+        }
+        if (specialInputs.TryGetValue("mic2", out var mic2) && !string.IsNullOrEmpty(mic2))
+        {
+            inputs.Add(new ObsAudioInput { Name = mic2, Kind = "Mic/Aux 2" });
+        }
+        if (specialInputs.TryGetValue("mic3", out var mic3) && !string.IsNullOrEmpty(mic3))
+        {
+            inputs.Add(new ObsAudioInput { Name = mic3, Kind = "Mic/Aux 3" });
+        }
+        if (specialInputs.TryGetValue("mic4", out var mic4) && !string.IsNullOrEmpty(mic4))
+        {
+            inputs.Add(new ObsAudioInput { Name = mic4, Kind = "Mic/Aux 4" });
+        }
+
+        return inputs;
+    }
+
+    public bool GetInputMute(string inputName)
+    {
+        return _obs.GetInputMute(inputName);
+    }
+
+    public void SetInputMute(string inputName, bool muted)
+    {
+        _obs.SetInputMute(inputName, muted);
+    }
+
+    public (double mul, double db) GetInputVolume(string inputName)
+    {
+        var volume = _obs.GetInputVolume(inputName);
+        return (volume.VolumeMul, volume.VolumeDb);
+    }
+
+    public void SetInputVolume(string inputName, double volumeMul)
+    {
+        _obs.SetInputVolume(inputName, (float)volumeMul, false);
+    }
+
     // Recording settings
     public ObsRecordingSettings GetRecordingSettings()
     {
@@ -318,6 +373,21 @@ public class ObsClient : IDisposable
     public void SetRecordingQuality(string quality)
     {
         _obs.SetProfileParameter("SimpleOutput", "RecQuality", quality);
+    }
+
+    public string GetRecordingDirectory()
+    {
+        var response = _obs.SendRequest("GetRecordDirectory");
+        return response?["recordDirectory"]?.Value<string>() ?? "unknown";
+    }
+
+    public void SetRecordingDirectory(string directory)
+    {
+        var requestData = new JObject
+        {
+            ["recordDirectory"] = directory
+        };
+        _obs.SendRequest("SetRecordDirectory", requestData);
     }
 
     public void Dispose()
@@ -388,4 +458,10 @@ public class ObsRecordingSettings
     public string Quality { get; init; } = string.Empty;
     public string Encoder { get; init; } = string.Empty;
     public string Path { get; init; } = string.Empty;
+}
+
+public class ObsAudioInput
+{
+    public string Name { get; init; } = string.Empty;
+    public string Kind { get; init; } = string.Empty;
 }

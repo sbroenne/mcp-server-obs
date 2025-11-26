@@ -10,10 +10,11 @@ A .NET 8 MCP (Model Context Protocol) server for controlling OBS Studio. Use it 
 
 Control OBS Studio through AI assistants (GitHub Copilot, Claude, etc.):
 
-- **Recording**: Start, stop, pause, resume, configure format/quality
+- **Recording**: Start, stop, pause, resume, configure format/quality (audio muted by default)
 - **Streaming**: Start, stop, monitor status
 - **Scenes**: List and switch scenes
 - **Sources**: Add window captures, manage visibility
+- **Audio**: Mute/unmute inputs, control volume (desktop audio, mic)
 - **Window Capture**: Programmatically select windows to record
 - **Media**: Screenshots, virtual camera
 
@@ -77,11 +78,14 @@ Or download `.vsix` from [GitHub Releases](https://github.com/sbroenne/mcp-serve
 | Tool | Actions |
 |------|---------|
 | `obs_connection` | Connect, Disconnect, GetStatus, GetStats |
-| `obs_recording` | Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality |
+| `obs_recording` | Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality, SetPath, GetPath |
 | `obs_streaming` | Start, Stop, GetStatus |
 | `obs_scene` | List, GetCurrent, Set, ListSources |
 | `obs_source` | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
+| `obs_audio` | GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll |
 | `obs_media` | TakeScreenshot, StartVirtualCamera, StopVirtualCamera |
+
+> **Note:** Recording starts with audio **muted** by default. Use `muteAudio=false` to include audio.
 
 ## Quick Start: Record a Window
 
@@ -91,7 +95,7 @@ Or download `.vsix` from [GitHub Releases](https://github.com/sbroenne/mcp-serve
 2. **Add source**: `obs_source(action: AddWindowCapture, sourceName: "My Capture")`
 3. **List windows**: `obs_source(action: ListWindows, sourceName: "My Capture")`
 4. **Select window**: `obs_source(action: SetWindowCapture, sourceName: "My Capture", windowValue: "...")`
-5. **Record**: `obs_recording(action: Start)`
+5. **Record**: `obs_recording(action: Start)` or `obs_recording(action: Start, path: "C:/Videos")`
 
 Or just ask your AI assistant: *"Record VS Code in OBS"*
 

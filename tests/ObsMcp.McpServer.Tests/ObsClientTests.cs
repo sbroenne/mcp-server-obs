@@ -293,4 +293,145 @@ public class RecordingSettingsTests
 
         Assert.Contains("Error", result);
     }
+
+    [Fact]
+    public void SetRecordingPath_ReturnsError_WhenNoPath()
+    {
+        var result = ObsRecordingTool.Recording(RecordingAction.SetPath);
+
+        Assert.Contains("path parameter is required", result);
+    }
+
+    [Fact]
+    public void GetRecordingPath_ReturnsError_WhenNotConnected()
+    {
+        try { ObsConnectionTool.Connection(ConnectionAction.Disconnect); } catch { }
+
+        var result = ObsRecordingTool.Recording(RecordingAction.GetPath);
+
+        Assert.StartsWith("Error:", result);
+    }
+}
+
+/// <summary>
+/// Unit tests for audio tool validation.
+/// </summary>
+public class AudioToolTests
+{
+    [Fact]
+    public void AudioTool_GetInputs_ReturnsError_WhenNotConnected()
+    {
+        try { ObsConnectionTool.Connection(ConnectionAction.Disconnect); } catch { }
+
+        var result = ObsAudioTool.Audio(AudioAction.GetInputs);
+
+        Assert.StartsWith("Error:", result);
+    }
+
+    [Fact]
+    public void AudioTool_Mute_ReturnsError_WhenNoInputName()
+    {
+        var result = ObsAudioTool.Audio(AudioAction.Mute);
+
+        Assert.Contains("inputName parameter is required", result);
+    }
+
+    [Fact]
+    public void AudioTool_Unmute_ReturnsError_WhenNoInputName()
+    {
+        var result = ObsAudioTool.Audio(AudioAction.Unmute);
+
+        Assert.Contains("inputName parameter is required", result);
+    }
+
+    [Fact]
+    public void AudioTool_GetMuteState_ReturnsError_WhenNoInputName()
+    {
+        var result = ObsAudioTool.Audio(AudioAction.GetMuteState);
+
+        Assert.Contains("inputName parameter is required", result);
+    }
+
+    [Fact]
+    public void AudioTool_SetVolume_ReturnsError_WhenNoInputName()
+    {
+        var result = ObsAudioTool.Audio(AudioAction.SetVolume, volume: 0.5);
+
+        Assert.Contains("inputName parameter is required", result);
+    }
+
+    [Fact]
+    public void AudioTool_SetVolume_ReturnsError_WhenNoVolume()
+    {
+        var result = ObsAudioTool.Audio(AudioAction.SetVolume, inputName: "Desktop Audio");
+
+        Assert.Contains("volume parameter is required", result);
+    }
+
+    [Theory]
+    [InlineData(-0.1)]
+    [InlineData(1.1)]
+    [InlineData(2.0)]
+    public void AudioTool_SetVolume_ReturnsError_WhenVolumeOutOfRange(double volume)
+    {
+        var result = ObsAudioTool.Audio(AudioAction.SetVolume, inputName: "Desktop Audio", volume: volume);
+
+        Assert.Contains("volume must be between 0.0 and 1.0", result);
+    }
+
+    [Fact]
+    public void AudioTool_GetVolume_ReturnsError_WhenNoInputName()
+    {
+        var result = ObsAudioTool.Audio(AudioAction.GetVolume);
+
+        Assert.Contains("inputName parameter is required", result);
+    }
+
+    [Fact]
+    public void AudioTool_MuteAll_ReturnsError_WhenNotConnected()
+    {
+        try { ObsConnectionTool.Connection(ConnectionAction.Disconnect); } catch { }
+
+        var result = ObsAudioTool.Audio(AudioAction.MuteAll);
+
+        Assert.StartsWith("Error:", result);
+    }
+
+    [Fact]
+    public void AudioTool_UnmuteAll_ReturnsError_WhenNotConnected()
+    {
+        try { ObsConnectionTool.Connection(ConnectionAction.Disconnect); } catch { }
+
+        var result = ObsAudioTool.Audio(AudioAction.UnmuteAll);
+
+        Assert.StartsWith("Error:", result);
+    }
+}
+
+/// <summary>
+/// Unit tests for ObsAudioInput DTO.
+/// </summary>
+public class ObsAudioInputTests
+{
+    [Fact]
+    public void ObsAudioInput_DefaultValues_AreCorrect()
+    {
+        var input = new ObsAudioInput();
+
+        Assert.Equal(string.Empty, input.Name);
+        Assert.Equal(string.Empty, input.Kind);
+    }
+
+    [Fact]
+    public void ObsAudioInput_Properties_CanBeSet()
+    {
+        var input = new ObsAudioInput
+        {
+            Name = "Desktop Audio",
+            Kind = "Desktop Audio"
+        };
+
+        Assert.Equal("Desktop Audio", input.Name);
+        Assert.Equal("Desktop Audio", input.Kind);
+    }
 }
