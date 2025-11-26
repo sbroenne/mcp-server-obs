@@ -1,0 +1,55 @@
+# VS Code Extension
+out
+dist
+node_modules
+.vscode-test/
+*.vsix
+
+# .NET
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.user
+*.cache
+*.suo
+*.userosscache
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Ll]og/
+[Ll]ogs/
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+# Build results
+[Oo]bj/
+[Bb]in/
+artifacts/
+publish/
+
+# VS Code Extension server binaries (built from .NET)
+vscode-extension/server/
+vscode-extension/bin/
+
+# Environment files with secrets
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+*.swp
+*~
+
+.vs/

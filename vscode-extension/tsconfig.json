@@ -1,0 +1,19 @@
+{
+	"compilerOptions": {
+		"module": "Node16",
+		"target": "ES2023",
+		"lib": [
+			"ES2023",
+			"DOM"
+		],
+		"sourceMap": true,
+		"rootDir": "src",
+		"outDir": "out",
+		"strict": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules"]
+}

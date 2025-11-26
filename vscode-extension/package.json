@@ -1,0 +1,110 @@
+{
+  "name": "obs-mcp",
+  "displayName": "OBS MCP Server",
+  "description": "OBS Studio automation for AI assistants - control recordings, streaming, scenes, and window capture via Model Context Protocol",
+  "version": "0.0.1",
+  "publisher": "sbroenne",
+  "icon": "images/icon.png",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sbroenne/mcp-server-obs"
+  },
+  "bugs": {
+    "url": "https://github.com/sbroenne/mcp-server-obs/issues"
+  },
+  "homepage": "https://github.com/sbroenne/mcp-server-obs#readme",
+  "engines": {
+    "vscode": "^1.106.0"
+  },
+  "os": [
+    "win32"
+  ],
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "keywords": [
+    "mcp",
+    "model context protocol",
+    "obs",
+    "obs-studio",
+    "screen-recording",
+    "streaming",
+    "video",
+    "copilot",
+    "ai",
+    "github copilot"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "extensionDependencies": [
+    "ms-dotnettools.vscode-dotnet-runtime"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "obs-mcp",
+        "label": "ObsMcp - OBS Studio Automation"
+      }
+    ],
+    "commands": [
+      {
+        "command": "obs-mcp.connect",
+        "title": "ObsMcp: Connect to OBS Studio"
+      },
+      {
+        "command": "obs-mcp.disconnect",
+        "title": "ObsMcp: Disconnect from OBS Studio"
+      },
+      {
+        "command": "obs-mcp.showStatus",
+        "title": "ObsMcp: Show Connection Status"
+      }
+    ],
+    "configuration": {
+      "title": "OBS MCP Server",
+      "properties": {
+        "obs-mcp.host": {
+          "type": "string",
+          "default": "localhost",
+          "description": "OBS WebSocket server host"
+        },
+        "obs-mcp.port": {
+          "type": "number",
+          "default": 4455,
+          "description": "OBS WebSocket server port"
+        },
+        "obs-mcp.password": {
+          "type": "string",
+          "default": "",
+          "description": "OBS WebSocket server password (if configured)"
+        },
+        "obs-mcp.autoConnect": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically connect to OBS on startup"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "clean": "cd .. && dotnet clean src/ObsMcp.McpServer/ObsMcp.McpServer.csproj -c Release || true",
+    "build:mcp-server": "npm run clean && cd .. && dotnet publish src/ObsMcp.McpServer/ObsMcp.McpServer.csproj -c Release -o vscode-extension/bin --verbosity minimal",
+    "vscode:prepublish": "npm run build:mcp-server && npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "npm run build:mcp-server && vsce package",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "22.x",
+    "@types/vscode": "^1.106.1",
+    "@vscode/vsce": "^3.7.0",
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.3"
+  }
+}

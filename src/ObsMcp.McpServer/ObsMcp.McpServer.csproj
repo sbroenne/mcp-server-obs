@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <ImplicitUsings>enable</ImplicitUsings>
+    
+    <!-- Assembly and Namespace Configuration -->
+    <AssemblyName>Sbroenne.ObsMcp.McpServer</AssemblyName>
+    <RootNamespace>Sbroenne.ObsMcp.McpServer</RootNamespace>
+    
+    <!-- MCP Server doesn't need XML documentation warnings -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    
+    <!-- Version Information -->
+    <Version>0.0.3</Version>
+    <AssemblyVersion>0.0.3.0</AssemblyVersion>
+    <FileVersion>0.0.3.0</FileVersion>
+    
+    <!-- Package Information -->
+    <PackageId>Sbroenne.ObsMcp.McpServer</PackageId>
+    <Title>Sbroenne ObsMcp Model Context Protocol Server</Title>
+    <Description>Model Context Protocol (MCP) server for OBS Studio by Sbroenne. Enables AI assistants like GitHub Copilot to automate OBS Studio - recordings, streaming, scenes, window capture, and more.</Description>
+    <PackageTags>obs;mcp;model-context-protocol;ai;automation;github-copilot;streaming;recording;screen-capture;windows;sbroenne</PackageTags>
+    
+    <!-- Framework-dependent deployment (requires .NET runtime) -->
+    <PublishSelfContained>false</PublishSelfContained>
+    <PublishTrimmed>false</PublishTrimmed>
+  </PropertyGroup>
+
+  <!-- Release Build Optimizations -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <!-- Disable debug symbols in Release builds -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+
+    <!-- Additional optimization flags -->
+    <Optimize>true</Optimize>
+    <TieredCompilation>true</TieredCompilation>
+    <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+  </PropertyGroup>
+
+  <!-- Remove XML docs and PDB files from Release output -->
+  <Target Name="RemoveDebugFilesFromRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <ItemGroup>
+      <XmlDocsToDelete Include="$(OutputPath)**\*.xml" />
+      <PdbFilesToDelete Include="$(OutputPath)**\*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(XmlDocsToDelete)" />
+    <Delete Files="@(PdbFilesToDelete)" />
+    <Message Text="Removed XML documentation and PDB files from Release build" Importance="high" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="obs-websocket-dotnet" />
+  </ItemGroup>
+
+</Project>
