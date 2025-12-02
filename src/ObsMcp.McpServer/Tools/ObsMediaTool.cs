@@ -1,5 +1,5 @@
-using ModelContextProtocol.Server;
 using System.ComponentModel;
+using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
 
@@ -20,21 +20,28 @@ public enum MediaAction
 /// OBS media operations tool
 /// </summary>
 [McpServerToolType]
-public static class ObsMediaTool
+public static partial class ObsMediaTool
 {
+    /// <summary>
+    /// OBS media operations (screenshots, virtual camera).
+    /// 
+    /// Actions:
+    /// - TakeScreenshot: Capture a screenshot of the current scene or a specific source
+    /// - StartVirtualCamera: Start the OBS virtual camera output
+    /// - StopVirtualCamera: Stop the OBS virtual camera
+    /// </summary>
+    /// <param name="action">Action to perform: TakeScreenshot, StartVirtualCamera, StopVirtualCamera</param>
+    /// <param name="sourceName">Source name to screenshot (optional, defaults to current scene)</param>
+    /// <param name="imageFormat">Screenshot format: png, jpg, or bmp (default: png)</param>
+    /// <param name="width">Screenshot width (optional)</param>
+    /// <param name="height">Screenshot height (optional)</param>
     [McpServerTool(Name = "obs_media")]
-    [Description(@"OBS media operations (screenshots, virtual camera).
-
-Actions:
-- TakeScreenshot: Capture a screenshot of the current scene or a specific source
-- StartVirtualCamera: Start the OBS virtual camera output
-- StopVirtualCamera: Stop the OBS virtual camera")]
-    public static string Media(
-        [Description("Action to perform: TakeScreenshot, StartVirtualCamera, StopVirtualCamera")] MediaAction action,
-        [Description("Source name to screenshot (optional, defaults to current scene)")] string? sourceName = null,
-        [Description("Screenshot format: png, jpg, or bmp (default: png)")] string? imageFormat = null,
-        [Description("Screenshot width (optional)")] int? width = null,
-        [Description("Screenshot height (optional)")] int? height = null)
+    public static partial string Media(
+        MediaAction action,
+        [DefaultValue(null)] string? sourceName,
+        [DefaultValue(null)] string? imageFormat,
+        [DefaultValue(null)] int? width,
+        [DefaultValue(null)] int? height)
     {
         try
         {

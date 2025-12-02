@@ -1,5 +1,5 @@
-using ModelContextProtocol.Server;
 using System.ComponentModel;
+using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
 
@@ -24,29 +24,36 @@ public enum SourceAction
 /// OBS source management tool
 /// </summary>
 [McpServerToolType]
-public static class ObsSourceTool
+public static partial class ObsSourceTool
 {
+    /// <summary>
+    /// Manage OBS capture sources.
+    /// 
+    /// Actions:
+    /// - AddWindowCapture: Add a window capture source (requires sourceName)
+    /// - ListWindows: List available windows for capture (requires sourceName of existing window capture)
+    /// - SetWindowCapture: Set which window to capture (requires sourceName and windowValue)
+    /// - Remove: Remove a source from a scene (requires sourceName)
+    /// - SetEnabled: Show or hide a source (requires sourceName and enabled)
+    /// 
+    /// WORKFLOW for recording a window:
+    /// 1. AddWindowCapture: Create a window capture source
+    /// 2. ListWindows: See available windows (ask user which one to record)
+    /// 3. SetWindowCapture: Select the window using the value from ListWindows
+    /// 4. Use obs_recording with action=Start to begin recording
+    /// </summary>
+    /// <param name="action">Action to perform: AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled</param>
+    /// <param name="sourceName">Name of the source (required for most actions)</param>
+    /// <param name="sceneName">Scene name (optional, uses current scene if not provided)</param>
+    /// <param name="windowValue">Window value from ListWindows (required for SetWindowCapture)</param>
+    /// <param name="enabled">Whether the source should be visible (required for SetEnabled)</param>
     [McpServerTool(Name = "obs_source")]
-    [Description(@"Manage OBS capture sources.
-
-Actions:
-- AddWindowCapture: Add a window capture source (requires sourceName)
-- ListWindows: List available windows for capture (requires sourceName of existing window capture)
-- SetWindowCapture: Set which window to capture (requires sourceName and windowValue)
-- Remove: Remove a source from a scene (requires sourceName)
-- SetEnabled: Show or hide a source (requires sourceName and enabled)
-
-WORKFLOW for recording a window:
-1. AddWindowCapture: Create a window capture source
-2. ListWindows: See available windows (ask user which one to record)
-3. SetWindowCapture: Select the window using the value from ListWindows
-4. Use obs_recording with action=Start to begin recording")]
-    public static string Source(
-        [Description("Action to perform: AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled")] SourceAction action,
-        [Description("Name of the source (required for most actions)")] string? sourceName = null,
-        [Description("Scene name (optional, uses current scene if not provided)")] string? sceneName = null,
-        [Description("Window value from ListWindows (required for SetWindowCapture)")] string? windowValue = null,
-        [Description("Whether the source should be visible (required for SetEnabled)")] bool? enabled = null)
+    public static partial string Source(
+        SourceAction action,
+        [DefaultValue(null)] string? sourceName,
+        [DefaultValue(null)] string? sceneName,
+        [DefaultValue(null)] string? windowValue,
+        [DefaultValue(null)] bool? enabled)
     {
         try
         {

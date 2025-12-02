@@ -1,5 +1,4 @@
 using ModelContextProtocol.Server;
-using System.ComponentModel;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
 
@@ -20,17 +19,20 @@ public enum StreamingAction
 /// OBS streaming control tool
 /// </summary>
 [McpServerToolType]
-public static class ObsStreamingTool
+public static partial class ObsStreamingTool
 {
+    /// <summary>
+    /// Control OBS streaming.
+    /// 
+    /// Actions:
+    /// - Start: Start streaming (requires stream settings configured in OBS)
+    /// - Stop: Stop streaming
+    /// - GetStatus: Get streaming status (active, reconnecting, duration, bytes sent)
+    /// </summary>
+    /// <param name="action">Action to perform: Start, Stop, GetStatus</param>
     [McpServerTool(Name = "obs_streaming")]
-    [Description(@"Control OBS streaming.
-
-Actions:
-- Start: Start streaming (requires stream settings configured in OBS)
-- Stop: Stop streaming
-- GetStatus: Get streaming status (active, reconnecting, duration, bytes sent)")]
-    public static string Streaming(
-        [Description("Action to perform: Start, Stop, GetStatus")] StreamingAction action)
+    public static partial string Streaming(
+        StreamingAction action)
     {
         try
         {

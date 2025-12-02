@@ -2,25 +2,43 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-var builder = Host.CreateApplicationBuilder(args);
+namespace Sbroenne.ObsMcp.McpServer;
 
-// Configure logging to stderr for MCP protocol compliance
-// (stdout is reserved for JSON-RPC messages)
-builder.Logging.AddConsole(consoleLogOptions =>
+/// <summary>
+/// Entry point for the OBS MCP Server.
+/// </summary>
+public static class Program
 {
-    consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace;
-});
-
-builder.Services
-    .AddMcpServer(options =>
+    public static async Task Main(string[] args)
     {
-        options.ServerInfo = new()
-        {
-            Name = "obs-mcp-server",
-            Version = "1.0.0"
-        };
+        var builder = Host.CreateApplicationBuilder(args);
 
-        options.ServerInstructions = """
+        // Configure logging to stderr for MCP protocol compliance
+        // (stdout is reserved for JSON-RPC messages)
+        builder.Logging.AddConsole(consoleLogOptions =>
+        {
+            consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace;
+        });
+
+        builder.Services
+            .AddMcpServer(options =>
+            {
+                options.ServerInfo = new()
+                {
+                    Name = "obs-mcp-server",
+                    Version = "1.0.0"
+                };
+
+                options.ServerInstructions = ServerInstructions;
+            })
+            .WithStdioServerTransport()
+            .WithToolsFromAssembly();
+
+        var app = builder.Build();
+        await app.RunAsync();
+    }
+
+    private const string ServerInstructions = """
             # OBS Studio MCP Server - Recording Setup Instructions
 
             This server controls OBS Studio for screen recording and streaming.
@@ -119,9 +137,4 @@ builder.Services
             4. Audio is muted by default - use muteAudio=false if needed
             5. Use window capture for specific apps
             """;
-    })
-    .WithStdioServerTransport()
-    .WithToolsFromAssembly();
-
-var app = builder.Build();
-await app.RunAsync();
+}

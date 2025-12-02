@@ -10,6 +10,8 @@
     
     <!-- MCP Server doesn't need XML documentation warnings -->
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Generate XML docs for MCP tool schema generation -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     
     <!-- Version Information -->
     <Version>0.0.3</Version>

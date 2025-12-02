@@ -1,5 +1,5 @@
-using ModelContextProtocol.Server;
 using System.ComponentModel;
+using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
 
@@ -34,35 +34,42 @@ public enum RecordingAction
 /// OBS recording control tool
 /// </summary>
 [McpServerToolType]
-public static class ObsRecordingTool
+public static partial class ObsRecordingTool
 {
+    /// <summary>
+    /// Control OBS recording.
+    /// 
+    /// Actions:
+    /// - Start: Start recording. Use 'path' parameter to set output directory (e.g., path='C:/Videos')
+    /// - Stop: Stop recording and save the file
+    /// - Pause: Pause the current recording
+    /// - Resume: Resume a paused recording
+    /// - GetStatus: Get recording status (active, paused, timecode)
+    /// - GetSettings: Get recording format, quality, encoder, and output path
+    /// - SetFormat: Set recording format (mp4, mkv, flv, mov, ts)
+    /// - SetQuality: Set recording quality (Stream, Small, HQ, Lossless)
+    /// - SetPath: Set recording output directory (e.g., path='C:/Videos')
+    /// - GetPath: Get current recording output directory
+    /// 
+    /// OUTPUT PATH: Use 'path' parameter with Start or SetPath to control where recordings are saved.
+    /// Example: obs_recording(action: Start, path: 'D:/MyRecordings')
+    /// 
+    /// AUDIO: By default, audio is MUTED when starting. Set muteAudio=false to include audio.
+    /// 
+    /// IMPORTANT: Add a capture source first using obs_source to avoid BLACK SCREEN recordings.
+    /// </summary>
+    /// <param name="action">Action to perform: Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality, SetPath, GetPath</param>
+    /// <param name="format">Recording format for SetFormat action: mp4 (recommended), mkv, flv, mov, ts</param>
+    /// <param name="quality">Quality preset for SetQuality action: Stream, Small, HQ (recommended), Lossless</param>
+    /// <param name="path">Output directory path for Start or SetPath actions. Example: 'C:/Videos' or 'D:/Recordings'</param>
+    /// <param name="muteAudio">Mute audio when starting recording. Default: true (audio muted). Set to false to record with audio.</param>
     [McpServerTool(Name = "obs_recording")]
-    [Description(@"Control OBS recording.
-
-Actions:
-- Start: Start recording. Use 'path' parameter to set output directory (e.g., path='C:/Videos')
-- Stop: Stop recording and save the file
-- Pause: Pause the current recording
-- Resume: Resume a paused recording
-- GetStatus: Get recording status (active, paused, timecode)
-- GetSettings: Get recording format, quality, encoder, and output path
-- SetFormat: Set recording format (mp4, mkv, flv, mov, ts)
-- SetQuality: Set recording quality (Stream, Small, HQ, Lossless)
-- SetPath: Set recording output directory (e.g., path='C:/Videos')
-- GetPath: Get current recording output directory
-
-OUTPUT PATH: Use 'path' parameter with Start or SetPath to control where recordings are saved.
-Example: obs_recording(action: Start, path: 'D:/MyRecordings')
-
-AUDIO: By default, audio is MUTED when starting. Set muteAudio=false to include audio.
-
-IMPORTANT: Add a capture source first using obs_source to avoid BLACK SCREEN recordings.")]
-    public static string Recording(
-        [Description("Action to perform: Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality, SetPath, GetPath")] RecordingAction action,
-        [Description("Recording format for SetFormat action: mp4 (recommended), mkv, flv, mov, ts")] string? format = null,
-        [Description("Quality preset for SetQuality action: Stream, Small, HQ (recommended), Lossless")] string? quality = null,
-        [Description("Output directory path for Start or SetPath actions. Example: 'C:/Videos' or 'D:/Recordings'")] string? path = null,
-        [Description("Mute audio when starting recording. Default: true (audio muted). Set to false to record with audio.")] bool muteAudio = true)
+    public static partial string Recording(
+        RecordingAction action,
+        [DefaultValue(null)] string? format,
+        [DefaultValue(null)] string? quality,
+        [DefaultValue(null)] string? path,
+        [DefaultValue(true)] bool muteAudio)
     {
         try
         {

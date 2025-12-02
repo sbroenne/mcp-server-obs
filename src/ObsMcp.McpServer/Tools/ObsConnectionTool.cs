@@ -1,5 +1,5 @@
-using ModelContextProtocol.Server;
 using System.ComponentModel;
+using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
 
@@ -22,7 +22,7 @@ public enum ConnectionAction
 /// OBS connection management tool
 /// </summary>
 [McpServerToolType]
-public static class ObsConnectionTool
+public static partial class ObsConnectionTool
 {
     private static ObsClient? _client;
 
@@ -35,21 +35,27 @@ public static class ObsConnectionTool
         return _client;
     }
 
+    /// <summary>
+    /// Manage OBS WebSocket connection.
+    /// 
+    /// Actions:
+    /// - Connect: Connect to OBS (required before other operations)
+    /// - Disconnect: Disconnect from OBS
+    /// - GetStatus: Get connection status, current scene, recording/streaming state
+    /// - GetStats: Get OBS performance statistics (FPS, CPU, memory)
+    /// 
+    /// Connection settings can be passed as parameters or via environment variables (OBS_HOST, OBS_PORT, OBS_PASSWORD).
+    /// </summary>
+    /// <param name="action">Action to perform: Connect, Disconnect, GetStatus, GetStats</param>
+    /// <param name="host">OBS WebSocket host (default: localhost, or OBS_HOST env var)</param>
+    /// <param name="port">OBS WebSocket port (default: 4455, or OBS_PORT env var)</param>
+    /// <param name="password">OBS WebSocket password (or OBS_PASSWORD env var)</param>
     [McpServerTool(Name = "obs_connection")]
-    [Description(@"Manage OBS WebSocket connection.
-
-Actions:
-- Connect: Connect to OBS (required before other operations)
-- Disconnect: Disconnect from OBS
-- GetStatus: Get connection status, current scene, recording/streaming state
-- GetStats: Get OBS performance statistics (FPS, CPU, memory)
-
-Connection settings can be passed as parameters or via environment variables (OBS_HOST, OBS_PORT, OBS_PASSWORD).")]
-    public static string Connection(
-        [Description("Action to perform: Connect, Disconnect, GetStatus, GetStats")] ConnectionAction action,
-        [Description("OBS WebSocket host (default: localhost, or OBS_HOST env var)")] string? host = null,
-        [Description("OBS WebSocket port (default: 4455, or OBS_PORT env var)")] int? port = null,
-        [Description("OBS WebSocket password (or OBS_PASSWORD env var)")] string? password = null)
+    public static partial string Connection(
+        ConnectionAction action,
+        [DefaultValue(null)] string? host,
+        [DefaultValue(null)] int? port,
+        [DefaultValue(null)] string? password)
     {
         try
         {

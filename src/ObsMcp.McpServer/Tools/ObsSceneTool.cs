@@ -1,5 +1,5 @@
-using ModelContextProtocol.Server;
 using System.ComponentModel;
+using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
 
@@ -22,19 +22,23 @@ public enum SceneAction
 /// OBS scene management tool
 /// </summary>
 [McpServerToolType]
-public static class ObsSceneTool
+public static partial class ObsSceneTool
 {
+    /// <summary>
+    /// Manage OBS scenes.
+    /// 
+    /// Actions:
+    /// - List: List all available scenes
+    /// - GetCurrent: Get the current active scene
+    /// - Set: Switch to a different scene (requires sceneName)
+    /// - ListSources: List all sources in a scene
+    /// </summary>
+    /// <param name="action">Action to perform: List, GetCurrent, Set, ListSources</param>
+    /// <param name="sceneName">Scene name (required for Set, optional for ListSources - uses current scene if not provided)</param>
     [McpServerTool(Name = "obs_scene")]
-    [Description(@"Manage OBS scenes.
-
-Actions:
-- List: List all available scenes
-- GetCurrent: Get the current active scene
-- Set: Switch to a different scene (requires sceneName)
-- ListSources: List all sources in a scene")]
-    public static string Scene(
-        [Description("Action to perform: List, GetCurrent, Set, ListSources")] SceneAction action,
-        [Description("Scene name (required for Set, optional for ListSources - uses current scene if not provided)")] string? sceneName = null)
+    public static partial string Scene(
+        SceneAction action,
+        [DefaultValue(null)] string? sceneName)
     {
         try
         {

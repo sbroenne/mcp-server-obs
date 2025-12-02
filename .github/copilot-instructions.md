@@ -85,13 +85,15 @@ dotnet publish src/ObsMcp.McpServer -c Release -r win-x64 --self-contained -o vs
 - Each tool in its own file: `Obs{Resource}Tool.cs`
 - Action enums: `{Resource}Action`
 - Handle errors with try/catch, return `"Error: {message}"` strings
-- Use `[Description]` attributes for MCP tool/parameter documentation
+- Use XML documentation (`///`) for MCP tool and parameter descriptions (SDK auto-extracts these)
 
 ## Adding New Tools
 
 1. Create `src/ObsMcp.McpServer/Tools/Obs{Resource}Tool.cs`
-2. Define `{Resource}Action` enum with actions
-3. Add `[McpServerTool]` method with action parameter
+2. Define `{Resource}Action` enum with actions (use `/// <summary>` on each value)
+3. Add `[McpServerTool]` method with:
+   - `/// <summary>` for tool description
+   - `/// <param name="...">` for each parameter description
 4. Use `ObsConnectionTool.GetClient()` for OBS access
 5. Add unit tests in `ObsClientTests.cs`
 6. Add integration tests in `IntegrationTests.cs`

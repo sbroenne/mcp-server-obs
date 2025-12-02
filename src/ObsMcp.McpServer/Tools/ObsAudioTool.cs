@@ -1,5 +1,5 @@
-using ModelContextProtocol.Server;
 using System.ComponentModel;
+using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
 
@@ -30,28 +30,33 @@ public enum AudioAction
 /// OBS audio control tool
 /// </summary>
 [McpServerToolType]
-public static class ObsAudioTool
+public static partial class ObsAudioTool
 {
+    /// <summary>
+    /// Control OBS audio inputs.
+    /// 
+    /// Actions:
+    /// - GetInputs: List all audio inputs (Desktop Audio, Mic/Aux, etc.)
+    /// - Mute: Mute a specific audio input
+    /// - Unmute: Unmute a specific audio input
+    /// - GetMuteState: Check if an audio input is muted
+    /// - SetVolume: Set volume level (0.0-1.0) for an audio input
+    /// - GetVolume: Get current volume level of an audio input
+    /// - MuteAll: Mute all audio inputs (desktop audio and microphone)
+    /// - UnmuteAll: Unmute all audio inputs
+    /// 
+    /// Common input names: 'Desktop Audio', 'Mic/Aux'
+    /// 
+    /// TIP: Use MuteAll before recording to capture video without sound.
+    /// </summary>
+    /// <param name="action">Action to perform: GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll</param>
+    /// <param name="inputName">Audio input name for Mute/Unmute/GetMuteState/SetVolume/GetVolume actions (e.g., 'Desktop Audio', 'Mic/Aux')</param>
+    /// <param name="volume">Volume level for SetVolume action (0.0 = silent, 1.0 = full volume)</param>
     [McpServerTool(Name = "obs_audio")]
-    [Description(@"Control OBS audio inputs.
-
-Actions:
-- GetInputs: List all audio inputs (Desktop Audio, Mic/Aux, etc.)
-- Mute: Mute a specific audio input
-- Unmute: Unmute a specific audio input
-- GetMuteState: Check if an audio input is muted
-- SetVolume: Set volume level (0.0-1.0) for an audio input
-- GetVolume: Get current volume level of an audio input
-- MuteAll: Mute all audio inputs (desktop audio and microphone)
-- UnmuteAll: Unmute all audio inputs
-
-Common input names: 'Desktop Audio', 'Mic/Aux'
-
-TIP: Use MuteAll before recording to capture video without sound.")]
-    public static string Audio(
-        [Description("Action to perform: GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll")] AudioAction action,
-        [Description("Audio input name for Mute/Unmute/GetMuteState/SetVolume/GetVolume actions (e.g., 'Desktop Audio', 'Mic/Aux')")] string? inputName = null,
-        [Description("Volume level for SetVolume action (0.0 = silent, 1.0 = full volume)")] double? volume = null)
+    public static partial string Audio(
+        AudioAction action,
+        [DefaultValue(null)] string? inputName,
+        [DefaultValue(null)] double? volume)
     {
         try
         {
