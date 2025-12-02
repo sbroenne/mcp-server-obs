@@ -1,6 +1,6 @@
 name: Release MCP Server
 
-# This workflow builds and releases the standalone OBS MCP Server
+# This workflow builds and releases the standalone OBS Studio MCP Server
 # Triggered by pushing tags matching 'mcp-v*'
 
 on:
@@ -48,37 +48,16 @@ jobs:
     - name: Run Tests
       run: dotnet test --filter "Category!=Integration" --no-restore
 
-    - name: Publish Self-Contained (Windows x64)
-      run: |
-        dotnet publish src/ObsMcp.McpServer/ObsMcp.McpServer.csproj `
-          -c Release `
-          -r win-x64 `
-          --self-contained true `
-          -p:PublishSingleFile=true `
-          -p:IncludeNativeLibrariesForSelfExtract=true `
-          -o publish/win-x64
-      shell: pwsh
+    - name: Publish (Portable)
+      run: dotnet publish src/ObsMcp.McpServer/ObsMcp.McpServer.csproj -c Release -o publish
 
-    - name: Publish Framework-Dependent (Windows x64)
-      run: |
-        dotnet publish src/ObsMcp.McpServer/ObsMcp.McpServer.csproj `
-          -c Release `
-          -r win-x64 `
-          --self-contained false `
-          -o publish/win-x64-fdd
-      shell: pwsh
-
-    - name: Create Release Archives
+    - name: Create Release Archive
       run: |
         $version = "${{ env.VERSION }}"
         
-        # Self-contained (larger, no .NET required)
-        Compress-Archive -Path "publish/win-x64/*" -DestinationPath "obs-mcp-server-$version-win-x64-self-contained.zip"
+        Compress-Archive -Path "publish/*" -DestinationPath "obs-mcp-server-$version.zip"
         
-        # Framework-dependent (smaller, requires .NET 8 runtime)
-        Compress-Archive -Path "publish/win-x64-fdd/*" -DestinationPath "obs-mcp-server-$version-win-x64.zip"
-        
-        Write-Output "Created release archives"
+        Write-Output "Created release archive"
         Get-ChildItem *.zip | Format-Table Name, Length
       shell: pwsh
 
@@ -88,56 +67,35 @@ jobs:
         $version = "${{ env.VERSION }}"
         
         $notes = @"
-        ## OBS MCP Server $tagName
+        ## OBS Studio MCP Server $tagName
         
-        Standalone MCP server for controlling OBS Studio via Model Context Protocol.
+        MCP server for controlling OBS Studio via Model Context Protocol.
         
-        ### Download Options
+        ### Download
         
         | File | Description |
         |------|-------------|
-        | obs-mcp-server-$version-win-x64-self-contained.zip | **Recommended** - Includes .NET runtime, no dependencies |
-        | obs-mcp-server-$version-win-x64.zip | Smaller download, requires [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) |
+        | obs-mcp-server-$version.zip | Cross-platform, requires [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) |
         
-        ### Available Tools (6 resource-based)
+        ### Available Tools (7 resource-based)
         
         | Tool | Actions |
         |------|---------|
         | obs_connection | Connect, Disconnect, GetStatus, GetStats |
-        | obs_recording | Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality |
+        | obs_recording | Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality, SetPath, GetPath |
         | obs_streaming | Start, Stop, GetStatus |
         | obs_scene | List, GetCurrent, Set, ListSources |
         | obs_source | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
+        | obs_audio | GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll |
         | obs_media | TakeScreenshot, StartVirtualCamera, StopVirtualCamera |
+        
+        > **Note:** Recording starts with audio **muted** by default. Use muteAudio=false to include audio.
         
         ### Installation
         
-        1. Extract the zip to a folder (e.g., ``C:\Tools\obs-mcp-server``)
-        2. Add to your MCP client config (Claude Desktop, VS Code, Cursor, etc.)
-        
-        Example mcp.json:
-        ``````json
-        {
-          "servers": {
-            "obs": {
-              "command": "C:/Tools/obs-mcp-server/Sbroenne.ObsMcp.McpServer.exe",
-              "env": {
-                "OBS_HOST": "localhost",
-                "OBS_PORT": "4455",
-                "OBS_PASSWORD": "your_password"
-              }
-            }
-          }
-        }
-        ``````
-        
-        ### Requirements
-        
-        - Windows 10/11
-        - OBS Studio with WebSocket server enabled
-        - .NET 8 Runtime (only for framework-dependent version)
-        
-        ### Documentation
+        1. Install [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+        2. Extract the zip to a folder
+        3. Run with ``dotnet Sbroenne.ObsMcp.McpServer.dll`` or add to your MCP client config
         
         See [README](https://github.com/sbroenne/mcp-server-obs/blob/main/README.md) for full documentation.
         "@
@@ -145,12 +103,11 @@ jobs:
         $notes | Out-File -FilePath "release_notes.md" -Encoding utf8
         
         gh release create "$tagName" `
-          "obs-mcp-server-$version-win-x64-self-contained.zip" `
-          "obs-mcp-server-$version-win-x64.zip" `
-          --title "OBS MCP Server $tagName" `
+          "obs-mcp-server-$version.zip" `
+          --title "OBS Studio MCP Server $tagName" `
           --notes-file release_notes.md
         
-        Write-Output "Released OBS MCP Server $version"
+        Write-Output "Released OBS Studio MCP Server $version"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: pwsh

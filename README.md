@@ -1,10 +1,10 @@
-# OBS MCP Server
+# OBS Studio MCP Server
 
 A .NET 8 MCP (Model Context Protocol) server for controlling OBS Studio. Use it standalone with any MCP client or via the included VS Code extension.
 
 > ⚠️ **This project is in active development.** APIs and features may change.
 
-> **Platform:** Windows only
+> **Platform:** Windows only (OBS WebSocket limitation)
 
 ## Features
 
@@ -26,8 +26,7 @@ Download from [GitHub Releases](https://github.com/sbroenne/mcp-server-obs/relea
 
 | Download | Description |
 |----------|-------------|
-| `obs-mcp-server-*-win-x64-self-contained.zip` | **Recommended** - No dependencies |
-| `obs-mcp-server-*-win-x64.zip` | Smaller, requires [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| `obs-mcp-server-*.zip` | Requires [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) |
 
 Extract and add to your MCP client config:
 
@@ -35,14 +34,35 @@ Extract and add to your MCP client config:
 {
   "servers": {
     "obs": {
-      "command": "C:/Tools/obs-mcp-server/Sbroenne.ObsMcp.McpServer.exe",
+      "command": "dotnet",
+      "args": ["C:/Tools/obs-mcp-server/Sbroenne.ObsMcp.McpServer.dll"],
       "env": {
-        "OBS_HOST": "localhost",
-        "OBS_PORT": "4455",
-        "OBS_PASSWORD": "your_password"
+        "OBS_HOST": "${input:obs_host}",
+        "OBS_PORT": "${input:obs_port}",
+        "OBS_PASSWORD": "${input:obs_password}"
       }
     }
-  }
+  },
+  "inputs": [
+    {
+      "id": "obs_host",
+      "type": "promptString",
+      "description": "OBS WebSocket host",
+      "default": "localhost"
+    },
+    {
+      "id": "obs_port",
+      "type": "promptString",
+      "description": "OBS WebSocket port",
+      "default": "4455"
+    },
+    {
+      "id": "obs_password",
+      "type": "promptString",
+      "description": "OBS WebSocket password",
+      "password": true
+    }
+  ]
 }
 ```
 
@@ -56,7 +76,7 @@ Extract and add to your MCP client config:
 
 ### Option 2: VS Code Extension
 
-Search for "OBS MCP Server" in VS Code Extensions and click Install.
+Search for "OBS Studio MCP Server" in VS Code Extensions and click Install.
 
 Or download `.vsix` from [GitHub Releases](https://github.com/sbroenne/mcp-server-obs/releases).
 

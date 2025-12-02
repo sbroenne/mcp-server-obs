@@ -1,4 +1,4 @@
-# OBS MCP Server - Development Instructions
+# OBS Studio MCP Server - Development Instructions
 
 ## Project Overview
 

@@ -1,6 +1,6 @@
 {
   "name": "obs-mcp",
-  "displayName": "OBS MCP Server",
+  "displayName": "OBS Studio MCP Server",
   "description": "OBS Studio automation for AI assistants - control recordings, streaming, scenes, and window capture via Model Context Protocol",
   "version": "0.0.1",
   "publisher": "sbroenne",
@@ -47,25 +47,11 @@
     "mcpServerDefinitionProviders": [
       {
         "id": "obs-mcp",
-        "label": "ObsMcp - OBS Studio Automation"
-      }
-    ],
-    "commands": [
-      {
-        "command": "obs-mcp.connect",
-        "title": "ObsMcp: Connect to OBS Studio"
-      },
-      {
-        "command": "obs-mcp.disconnect",
-        "title": "ObsMcp: Disconnect from OBS Studio"
-      },
-      {
-        "command": "obs-mcp.showStatus",
-        "title": "ObsMcp: Show Connection Status"
+        "label": "OBS Studio MCP Server"
       }
     ],
     "configuration": {
-      "title": "OBS MCP Server",
+      "title": "OBS Studio MCP Server",
       "properties": {
         "obs-mcp.host": {
           "type": "string",
@@ -100,11 +86,11 @@
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/node": "22.x",
+    "@types/node": "^22.19.1",
     "@types/vscode": "^1.106.1",
-    "@vscode/vsce": "^3.7.0",
+    "@vscode/vsce": "^3.7.1",
     "eslint": "^9.39.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.3"
+    "typescript-eslint": "^8.48.0"
   }
 }

@@ -1,6 +1,6 @@
 name: Release VS Code Extension
 
-# This workflow builds and releases the OBS MCP VS Code extension
+# This workflow builds and releases the OBS Studio MCP VS Code extension
 # Triggered by pushing tags matching 'vscode-v*'
 
 on:
@@ -122,11 +122,11 @@ jobs:
           $marketplaceStatus = "Published to VS Code Marketplace"
         }
 
-        $notes = "## OBS MCP Server VS Code Extension $tagName`n`n"
+        $notes = "## OBS Studio MCP Server VS Code Extension $tagName`n`n"
         $notes += "### Control OBS Studio from VS Code with AI`n`n"
         $notes += "This extension registers the OBS MCP server with VS Code, enabling AI assistants to control OBS Studio.`n`n"
         $notes += "### Installation Options`n`n"
-        $notes += "**Option 1: VS Code Marketplace** - Search for 'OBS MCP Server' and click Install`n"
+        $notes += "**Option 1: VS Code Marketplace** - Search for 'OBS Studio MCP Server' and click Install`n"
         $notes += "**Option 2: Manual VSIX** - Download obs-mcp-server-$version.vsix below and install via VS Code`n`n"
         $notes += "### Publishing Status: $marketplaceStatus`n`n"
         $notes += "### Key Features`n"
@@ -144,9 +144,9 @@ jobs:
 
         $notes | Out-File -FilePath "release_notes.md" -Encoding utf8
 
-        gh release create "$tagName" "$vsixFile" --title "OBS MCP Server VS Code Extension $tagName" --notes-file release_notes.md
+        gh release create "$tagName" "$vsixFile" --title "OBS Studio MCP Server VS Code Extension $tagName" --notes-file release_notes.md
 
-        Write-Output "Released OBS MCP Server VS Code Extension $version"
+        Write-Output "Released OBS Studio MCP Server VS Code Extension $version"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: pwsh

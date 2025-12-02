@@ -21,7 +21,7 @@ builder.Services
         };
 
         options.ServerInstructions = """
-            # OBS MCP Server - Recording Setup Instructions
+            # OBS Studio MCP Server - Recording Setup Instructions
 
             This server controls OBS Studio for screen recording and streaming.
             

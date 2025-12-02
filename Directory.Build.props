@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -9,9 +9,9 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Authors>sbroenne</Authors>
-    <Company>sbroenne</Company>
-    <Copyright>Copyright © 2025 sbroenne</Copyright>
+    <Authors>Stefan Broenner</Authors>
+    <Company>Open Source Developer</Company>
+    <Copyright>Copyright © 2025 Stefan Broenner</Copyright>
     <PackageProjectUrl>https://github.com/sbroenne/mcp-server-obs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/sbroenne/mcp-server-obs</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
