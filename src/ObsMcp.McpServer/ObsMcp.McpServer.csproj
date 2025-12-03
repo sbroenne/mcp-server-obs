@@ -41,15 +41,15 @@
     <TieredCompilationQuickJit>true</TieredCompilationQuickJit>
   </PropertyGroup>
 
-  <!-- Remove XML docs and PDB files from Release output -->
-  <Target Name="RemoveDebugFilesFromRelease" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+  <!-- Remove XML docs and PDB files from Publish output -->
+  <Target Name="RemoveDebugFilesFromPublish" AfterTargets="Publish" Condition="'$(Configuration)' == 'Release'">
     <ItemGroup>
-      <XmlDocsToDelete Include="$(OutputPath)**\*.xml" />
-      <PdbFilesToDelete Include="$(OutputPath)**\*.pdb" />
+      <XmlDocsToDelete Include="$(PublishDir)**\*.xml" />
+      <PdbFilesToDelete Include="$(PublishDir)**\*.pdb" />
     </ItemGroup>
     <Delete Files="@(XmlDocsToDelete)" />
     <Delete Files="@(PdbFilesToDelete)" />
-    <Message Text="Removed XML documentation and PDB files from Release build" Importance="high" />
+    <Message Text="Removed XML documentation and PDB files from publish output" Importance="high" />
   </Target>
 
   <ItemGroup>
