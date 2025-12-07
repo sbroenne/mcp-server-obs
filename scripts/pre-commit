@@ -1,0 +1,26 @@
+#!/bin/sh
+# Pre-commit hook that runs all tests before allowing a commit.
+# Install with: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+
+echo "🧪 Running tests before commit..."
+echo ""
+
+# Load .env file if it exists (for OBS_PASSWORD)
+if [ -f .env ]; then
+    export $(cat .env | grep -v '^#' | xargs)
+fi
+
+# Run all tests
+dotnet test --verbosity minimal
+
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Tests failed. Commit aborted."
+    echo ""
+    echo "To skip this check (not recommended), use: git commit --no-verify"
+    exit 1
+fi
+
+echo ""
+echo "✅ All tests passed. Proceeding with commit."
+exit 0

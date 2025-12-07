@@ -7,7 +7,7 @@ Control OBS Studio recordings, streaming, and scenes directly from VS Code using
 - **Zero Configuration** - Automatically registers the OBS MCP server with VS Code
 - **Full OBS Control** - Manage recordings, streaming, scenes, and sources
 - **Window Capture** - Programmatically select which window to record
-- **Screenshot Support** - Capture screenshots of scenes or sources
+- **Screenshot Support** - Save screenshots of scenes or sources to files
 - **Virtual Camera** - Control OBS virtual camera
 
 ## Requirements
@@ -19,36 +19,23 @@ Control OBS Studio recordings, streaming, and scenes directly from VS Code using
 
 ## Installation
 
-### Option 1: VS Code Marketplace
-Search for "OBS MCP Server" in the VS Code Extensions view and click Install.
+### VS Code Marketplace (Recommended)
 
-### Option 2: Install from VSIX (Local Development)
+[![Install in VS Code](https://img.shields.io/badge/VS%20Code-Install%20Extension-blue?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
 
-1. Download the `.vsix` file from [GitHub Releases](https://github.com/sbroenne/mcp-server-obs/releases) or build locally
+1. Open VS Code
+2. Go to Extensions (`Ctrl+Shift+X`)
+3. Search for **"OBS Studio MCP Server"**
+4. Click **Install**
+
+Or run: `code --install-extension sbroenne.obs-mcp-server`
+
+### Install from VSIX (Manual)
+
+1. Download the `.vsix` file from [GitHub Releases](https://github.com/sbroenne/mcp-server-obs/releases)
 2. In VS Code, open the Command Palette (`Ctrl+Shift+P`)
 3. Run **Extensions: Install from VSIX...**
 4. Select the downloaded `.vsix` file
-
-Or install via command line:
-```powershell
-code --install-extension obs-mcp-0.0.3.vsix
-```
-
-### Option 3: Build from Source
-
-```powershell
-# Clone the repository
-git clone https://github.com/sbroenne/mcp-server-obs.git
-cd mcp-server-obs
-
-# Build the .NET MCP server and VS Code extension
-cd vscode-extension
-npm install
-npm run package
-
-# Install the extension
-code --install-extension obs-mcp-0.0.3.vsix
-```
 
 ## Setup
 
@@ -108,7 +95,7 @@ Once connected, the following tools are available to AI assistants:
 - `obs_set_source_enabled` - Show/hide a source
 
 ### Media
-- `obs_take_screenshot` - Take a screenshot
+- `obs_save_screenshot` - Save a screenshot to a file
 - `obs_start_virtual_camera` - Start virtual camera
 - `obs_stop_virtual_camera` - Stop virtual camera
 
@@ -119,7 +106,7 @@ In Copilot Chat, try:
 - "Connect to OBS and start recording"
 - "Add a window capture of VS Code"
 - "List all available windows and capture Chrome"
-- "Take a screenshot of the current scene"
+- "Save a screenshot of the current scene to C:/Screenshots/capture.png"
 - "Switch to scene 'Gaming' and start streaming"
 
 ## Troubleshooting

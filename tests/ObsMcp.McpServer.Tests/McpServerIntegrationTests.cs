@@ -1,4 +1,5 @@
 using System.IO.Pipelines;
+using DotNetEnv;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
@@ -36,6 +37,15 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
     private McpClient? _client;
     private IServiceProvider? _serviceProvider;
     private Task? _serverTask;
+
+    /// <summary>
+    /// Static constructor to load .env file once for all tests.
+    /// </summary>
+    static McpServerIntegrationTests()
+    {
+        // Load .env file from project root (searches up from bin directory)
+        Env.TraversePath().Load();
+    }
 
     /// <summary>
     /// Expected tool names from our assembly - the source of truth.
@@ -369,6 +379,37 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
     }
 
     /// <summary>
+    /// Tests that obs_media SaveScreenshot requires filePath parameter.
+    /// </summary>
+    [Fact]
+    public async Task CallTool_MediaSaveScreenshot_RequiresFilePath()
+    {
+        output.WriteLine("=== SAVESCREENSHOT PARAMETER VALIDATION VIA MCP PROTOCOL ===\n");
+
+        var arguments = new Dictionary<string, object?>
+        {
+            ["action"] = "SaveScreenshot"
+            // Missing required filePath
+        };
+
+        var result = await _client!.CallToolAsync(
+            "obs_media",
+            arguments,
+            cancellationToken: _cts.Token);
+
+        Assert.NotNull(result);
+        var textBlock = result.Content.OfType<TextContentBlock>().FirstOrDefault();
+        Assert.NotNull(textBlock);
+
+        output.WriteLine($"Tool response: {textBlock.Text}");
+
+        // Should return error about missing filePath
+        Assert.Contains("filePath is required", textBlock.Text);
+
+        output.WriteLine("\n✓ obs_media SaveScreenshot filePath validation works via MCP protocol");
+    }
+
+    /// <summary>
     /// Tests each tool has the expected action parameter.
     /// </summary>
     [Theory]
@@ -378,7 +419,7 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
     [InlineData("obs_scene", "List", "GetCurrent", "Set", "ListSources")]
     [InlineData("obs_source", "AddWindowCapture", "ListWindows", "SetWindowCapture", "Remove", "SetEnabled")]
     [InlineData("obs_audio", "GetInputs", "Mute", "Unmute", "GetMuteState", "SetVolume", "GetVolume", "MuteAll", "UnmuteAll")]
-    [InlineData("obs_media", "TakeScreenshot", "StartVirtualCamera", "StopVirtualCamera")]
+    [InlineData("obs_media", "SaveScreenshot", "StartVirtualCamera", "StopVirtualCamera")]
     public async Task Tool_HasExpectedActions(string toolName, params string[] expectedActions)
     {
         output.WriteLine($"=== VALIDATING {toolName} ACTIONS ===\n");

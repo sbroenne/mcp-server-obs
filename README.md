@@ -20,7 +20,20 @@ Control OBS Studio through AI assistants (GitHub Copilot, Claude, etc.):
 
 ## Installation
 
-### Option 1: Standalone MCP Server (Any MCP Client)
+### VS Code / VS Code Insiders (Recommended)
+
+Install directly from the VS Code Marketplace:
+
+[![Install in VS Code](https://img.shields.io/badge/VS%20Code-Install%20Extension-blue?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
+
+1. Open VS Code
+2. Go to Extensions (`Ctrl+Shift+X`)
+3. Search for **"OBS Studio MCP Server"**
+4. Click **Install**
+
+Or run: `code --install-extension sbroenne.obs-mcp-server`
+
+### Other MCP Clients (Claude Desktop, Cursor, Windsurf, etc.)
 
 Download from [GitHub Releases](https://github.com/sbroenne/mcp-server-obs/releases):
 
@@ -70,15 +83,8 @@ Extract and add to your MCP client config:
 | Client | Path |
 |--------|------|
 | Claude Desktop | `%APPDATA%\Claude\claude_desktop_config.json` |
-| VS Code | `.vscode/mcp.json` in workspace |
 | Cursor | `~/.cursor/mcp.json` |
 | Windsurf | `~/.codeium/windsurf/mcp_config.json` |
-
-### Option 2: VS Code Extension
-
-Search for "OBS Studio MCP Server" in VS Code Extensions and click Install.
-
-Or download `.vsix` from [GitHub Releases](https://github.com/sbroenne/mcp-server-obs/releases).
 
 ## Prerequisites
 
@@ -103,7 +109,7 @@ Or download `.vsix` from [GitHub Releases](https://github.com/sbroenne/mcp-serve
 | `obs_scene` | List, GetCurrent, Set, ListSources |
 | `obs_source` | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
 | `obs_audio` | GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll |
-| `obs_media` | TakeScreenshot, StartVirtualCamera, StopVirtualCamera |
+| `obs_media` | SaveScreenshot, StartVirtualCamera, StopVirtualCamera |
 
 > **Note:** Recording starts with audio **muted** by default. Use `muteAudio=false` to include audio.
 

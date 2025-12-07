@@ -8,8 +8,8 @@ namespace Sbroenne.ObsMcp.McpServer.Tools;
 /// </summary>
 public enum MediaAction
 {
-    /// <summary>Take a screenshot</summary>
-    TakeScreenshot,
+    /// <summary>Save a screenshot to a file</summary>
+    SaveScreenshot,
     /// <summary>Start the virtual camera</summary>
     StartVirtualCamera,
     /// <summary>Stop the virtual camera</summary>
@@ -26,28 +26,32 @@ public static partial class ObsMediaTool
     /// OBS media operations (screenshots, virtual camera).
     /// 
     /// Actions:
-    /// - TakeScreenshot: Capture a screenshot of the current scene or a specific source
+    /// - SaveScreenshot: Save a screenshot of the current scene or a specific source to a file
     /// - StartVirtualCamera: Start the OBS virtual camera output
     /// - StopVirtualCamera: Stop the OBS virtual camera
     /// </summary>
-    /// <param name="action">Action to perform: TakeScreenshot, StartVirtualCamera, StopVirtualCamera</param>
+    /// <param name="action">Action to perform: SaveScreenshot, StartVirtualCamera, StopVirtualCamera</param>
+    /// <param name="filePath">Full file path to save the screenshot (required for SaveScreenshot, e.g., C:/Screenshots/capture.png)</param>
     /// <param name="sourceName">Source name to screenshot (optional, defaults to current scene)</param>
-    /// <param name="imageFormat">Screenshot format: png, jpg, or bmp (default: png)</param>
-    /// <param name="width">Screenshot width (optional)</param>
-    /// <param name="height">Screenshot height (optional)</param>
+    /// <param name="imageFormat">Screenshot format: png or jpg (default: png)</param>
+    /// <param name="width">Screenshot width in pixels (optional, defaults to source resolution)</param>
+    /// <param name="height">Screenshot height in pixels (optional, defaults to source resolution)</param>
+    /// <param name="quality">Image compression quality 1-100 (optional, for jpg format)</param>
     [McpServerTool(Name = "obs_media")]
     public static partial string Media(
         MediaAction action,
+        [DefaultValue(null)] string? filePath,
         [DefaultValue(null)] string? sourceName,
         [DefaultValue(null)] string? imageFormat,
         [DefaultValue(null)] int? width,
-        [DefaultValue(null)] int? height)
+        [DefaultValue(null)] int? height,
+        [DefaultValue(null)] int? quality)
     {
         try
         {
             return action switch
             {
-                MediaAction.TakeScreenshot => DoTakeScreenshot(sourceName, imageFormat, width, height),
+                MediaAction.SaveScreenshot => DoSaveScreenshot(filePath, sourceName, imageFormat, width, height, quality),
                 MediaAction.StartVirtualCamera => DoStartVirtualCamera(),
                 MediaAction.StopVirtualCamera => DoStopVirtualCamera(),
                 _ => $"Error: Unknown action '{action}'"
@@ -59,20 +63,37 @@ public static partial class ObsMediaTool
         }
     }
 
-    private static string DoTakeScreenshot(string? sourceName, string? imageFormat, int? width, int? height)
+    private static string DoSaveScreenshot(string? filePath, string? sourceName, string? imageFormat, int? width, int? height, int? quality)
     {
-        var format = imageFormat ?? "png";
-        var client = ObsConnectionTool.GetClient();
-        var result = client.TakeScreenshot(sourceName, format, width, height);
-
-        if (string.IsNullOrEmpty(result))
+        if (string.IsNullOrWhiteSpace(filePath))
         {
-            return "Error: Screenshot returned empty result";
+            return "Error: filePath is required for SaveScreenshot action. Please provide a full file path (e.g., C:/Screenshots/capture.png)";
         }
 
-        return $"Screenshot captured:\n" +
-               $"Format: {format}\n" +
-               $"Data length: {result.Length} characters (base64)";
+        // Determine format from file extension if not specified
+        var format = imageFormat;
+        if (string.IsNullOrEmpty(format))
+        {
+            var extension = Path.GetExtension(filePath).ToLowerInvariant();
+            format = extension switch
+            {
+                ".jpg" or ".jpeg" => "jpg",
+                ".bmp" => "bmp",
+                _ => "png"
+            };
+        }
+
+        // Ensure directory exists
+        var directory = Path.GetDirectoryName(filePath);
+        if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        var client = ObsConnectionTool.GetClient();
+        client.SaveScreenshot(filePath, sourceName, format, width, height, quality);
+
+        return $"Screenshot saved to: {filePath}";
     }
 
     private static string DoStartVirtualCamera()

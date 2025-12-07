@@ -38,7 +38,7 @@ Tools follow the **resource + action enum** pattern (like mcp-server-excel):
 | `obs_scene` | List, GetCurrent, Set, ListSources |
 | `obs_source` | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
 | `obs_audio` | GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll |
-| `obs_media` | TakeScreenshot, StartVirtualCamera, StopVirtualCamera |
+| `obs_media` | SaveScreenshot, StartVirtualCamera, StopVirtualCamera |
 
 **Audio Note:** Recording starts with audio MUTED by default. Use `muteAudio=false` to include audio.
 
@@ -75,8 +75,20 @@ dotnet publish src/ObsMcp.McpServer -c Release -r win-x64 --self-contained -o vs
 ### Integration Tests
 - Require OBS Studio running with WebSocket enabled
 - Configure `.env` file with `OBS_PASSWORD`
-- Located in `tests/ObsMcp.McpServer.Tests/IntegrationTests.cs`
-- Will auto-start OBS if not running
+- Located in `tests/ObsMcp.McpServer.Tests/McpServerIntegrationTests.cs`
+- **MUST fail if OBS is not running** - never silently skip or return early
+- Mark with `[Trait("Category", "Integration")]`
+
+### Test Requirements
+- **Integration tests MUST fail clearly** if prerequisites (like OBS) are not available
+- Never use `return;` to skip tests silently - use proper assertions that fail
+- All tests must have clear failure messages explaining what went wrong
+
+## Git Workflow
+
+- **Never commit or push without explicit user consent**
+- Always ask before running `git commit` or `git push`
+- Create issues and PRs for changes - do not commit directly to main
 
 ## Code Style
 
