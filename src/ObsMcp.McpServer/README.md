@@ -155,7 +155,7 @@ The server provides 6 resource-based tools with action enums:
 | `obs_streaming` | `Start`, `Stop`, `GetStatus` | Streaming control |
 | `obs_scene` | `List`, `GetCurrent`, `Set`, `ListSources` | Scene management |
 | `obs_source` | `AddWindowCapture`, `ListWindows`, `SetWindowCapture`, `Remove`, `SetEnabled` | Source management |
-| `obs_media` | `TakeScreenshot`, `StartVirtualCamera`, `StopVirtualCamera` | Media operations |
+| `obs_media` | `SaveScreenshot`, `StartVirtualCamera`, `StopVirtualCamera` | Media operations |
 
 ## Window Capture Workflow
 
@@ -213,7 +213,7 @@ ObsMcp.McpServer/
 │   ├── ObsStreamingTool.cs    # obs_streaming tool (Start, Stop, GetStatus)
 │   ├── ObsSceneTool.cs        # obs_scene tool (List, GetCurrent, Set, ListSources)
 │   ├── ObsSourceTool.cs       # obs_source tool (AddWindowCapture, ListWindows, etc.)
-│   └── ObsMediaTool.cs        # obs_media tool (TakeScreenshot, VirtualCamera)
+│   └── ObsMediaTool.cs        # obs_media tool (SaveScreenshot, VirtualCamera)
 └── README.md                  # This file
 ```
 

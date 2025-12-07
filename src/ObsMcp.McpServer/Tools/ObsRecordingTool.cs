@@ -125,8 +125,8 @@ public static partial class ObsRecordingTool
     private static string DoStop()
     {
         var client = ObsConnectionTool.GetClient();
-        client.StopRecording();
-        return "Recording stopped and saved";
+        var outputPath = client.StopRecording();
+        return $"Recording stopped and saved to: {outputPath}";
     }
 
     private static string DoPause()

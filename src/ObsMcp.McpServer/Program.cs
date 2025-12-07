@@ -51,7 +51,7 @@ public static class Program
             - `obs_scene` - List, GetCurrent, Set, ListSources
             - `obs_source` - AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled
             - `obs_audio` - GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll
-            - `obs_media` - TakeScreenshot, StartVirtualCamera, StopVirtualCamera
+            - `obs_media` - SaveScreenshot, StartVirtualCamera, StopVirtualCamera
             
             ## IMPORTANT: Audio is MUTED by Default
             

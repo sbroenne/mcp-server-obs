@@ -11,7 +11,7 @@ This MCP server controls OBS Studio for screen recording and streaming.
 | `obs_streaming` | Start, Stop, GetStatus |
 | `obs_scene` | List, GetCurrent, Set, ListSources |
 | `obs_source` | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
-| `obs_media` | TakeScreenshot, StartVirtualCamera, StopVirtualCamera |
+| `obs_media` | SaveScreenshot, StartVirtualCamera, StopVirtualCamera |
 
 ## CRITICAL: Prevent Black Screen Recordings
 

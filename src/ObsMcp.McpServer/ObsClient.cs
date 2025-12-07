@@ -65,7 +65,7 @@ public class ObsClient : IDisposable
 
     // Recording operations
     public void StartRecording() => _obs.StartRecord();
-    public void StopRecording() => _obs.StopRecord();
+    public string StopRecording() => _obs.StopRecord();
     public void PauseRecording() => _obs.PauseRecord();
     public void ResumeRecording() => _obs.ResumeRecord();
 
@@ -259,16 +259,17 @@ public class ObsClient : IDisposable
         }
     }
 
-    // Screenshot
-    public string TakeScreenshot(string? sourceName, string imageFormat, int? width, int? height)
+    // Screenshot - saves to file
+    public void SaveScreenshot(string filePath, string? sourceName, string imageFormat, int? width, int? height, int? quality)
     {
         var scene = sourceName ?? GetCurrentScene();
         // Use -1 to indicate source resolution (OBS default)
         var w = width ?? -1;
         var h = height ?? -1;
+        var q = quality ?? -1;
 
-        // Use GetSourceScreenshot which returns base64 data
-        return _obs.GetSourceScreenshot(scene, imageFormat, w, h, -1);
+        // Use SaveSourceScreenshot which saves directly to file
+        _obs.SaveSourceScreenshot(scene, imageFormat, filePath, w, h, q);
     }
 
     // Virtual camera
