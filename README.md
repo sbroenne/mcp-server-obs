@@ -1,6 +1,11 @@
 # OBS Studio MCP Server
 
-A .NET 8 MCP (Model Context Protocol) server for controlling OBS Studio. Use it standalone with any MCP client or via the included VS Code extension.
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/sbroenne.obs-mcp-server?label=VS%20Code%20Marketplace&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/sbroenne.obs-mcp-server?label=Installs&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
+[![GitHub Downloads](https://img.shields.io/github/downloads/sbroenne/mcp-server-obs/total?label=GitHub%20Downloads&logo=github)](https://github.com/sbroenne/mcp-server-obs/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+A .NET 10 MCP (Model Context Protocol) server for controlling OBS Studio. Use it standalone with any MCP client or via the included VS Code extension.
 
 > ⚠️ **This project is in active development.** APIs and features may change.
 
@@ -39,7 +44,7 @@ Download from [GitHub Releases](https://github.com/sbroenne/mcp-server-obs/relea
 
 | Download | Description |
 |----------|-------------|
-| `obs-mcp-server-*.zip` | Requires [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) |
+| `obs-mcp-server-*.zip` | Requires [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) |
 
 Extract and add to your MCP client config:
 
@@ -144,8 +149,8 @@ dotnet test --filter "Category=Integration"
 
 ```
 mcp-server-obs/
-├── src/ObsMcp.McpServer/       # .NET 8 MCP Server
-│   └── Tools/                  # 6 resource-based tools
+├── src/ObsMcp.McpServer/       # .NET 10 MCP Server
+│   └── Tools/                  # 7 resource-based tools
 ├── tests/                      # Unit & integration tests
 ├── vscode-extension/           # VS Code extension wrapper
 └── .github/workflows/          # Release automation

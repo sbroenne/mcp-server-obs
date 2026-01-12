@@ -2,13 +2,13 @@
 
 ## Project Overview
 
-This is a VS Code extension that provides an MCP (Model Context Protocol) server for controlling OBS Studio. The MCP server is implemented in .NET 8, and the VS Code extension is a thin TypeScript wrapper that registers the server.
+This is a VS Code extension that provides an MCP (Model Context Protocol) server for controlling OBS Studio. The MCP server is implemented in .NET 10, and the VS Code extension is a thin TypeScript wrapper that registers the server.
 
 ## Architecture
 
 ```
 mcp-server-obs/
-├── src/ObsMcp.McpServer/       # .NET 8 MCP Server (main codebase)
+├── src/ObsMcp.McpServer/       # .NET 10 MCP Server (main codebase)
 │   ├── Program.cs              # Entry point with server instructions
 │   ├── ObsClient.cs            # OBS WebSocket client wrapper
 │   └── Tools/                  # 7 MCP tools with action enums
@@ -20,7 +20,7 @@ mcp-server-obs/
 
 ## Key Technologies
 
-- **.NET 8** - MCP server implementation
+- **.NET 10** - MCP server implementation
 - **ModelContextProtocol** NuGet package - MCP SDK for .NET
 - **obs-websocket-dotnet** - OBS WebSocket client library
 - **xUnit** - Unit and integration testing

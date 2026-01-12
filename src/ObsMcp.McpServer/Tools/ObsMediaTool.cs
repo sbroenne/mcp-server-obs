@@ -37,7 +37,7 @@ public static partial class ObsMediaTool
     /// <param name="width">Screenshot width in pixels (optional, defaults to source resolution)</param>
     /// <param name="height">Screenshot height in pixels (optional, defaults to source resolution)</param>
     /// <param name="quality">Image compression quality 1-100 (optional, for jpg format)</param>
-    [McpServerTool(Name = "obs_media")]
+    [McpServerTool(Name = "obs_media", Title = "OBS Media Operations", Destructive = true)]
     public static partial string Media(
         MediaAction action,
         [DefaultValue(null)] string? filePath,

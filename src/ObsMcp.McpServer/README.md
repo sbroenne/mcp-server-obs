@@ -1,6 +1,6 @@
 # OBS MCP Server
 
-A .NET 8 MCP (Model Context Protocol) server for controlling OBS Studio. This server can be used standalone with any MCP-compatible client or as part of the VS Code extension.
+A .NET 10 MCP (Model Context Protocol) server for controlling OBS Studio. This server can be used standalone with any MCP-compatible client or as part of the VS Code extension.
 
 > **Platform:** Windows only (due to OBS WebSocket and window capture dependencies)
 
@@ -19,7 +19,7 @@ A .NET 8 MCP (Model Context Protocol) server for controlling OBS Studio. This se
 ### Prerequisites
 
 - **Windows 10/11**
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
 - [OBS Studio](https://obsproject.com/) with WebSocket server enabled
 
 ### Build Commands

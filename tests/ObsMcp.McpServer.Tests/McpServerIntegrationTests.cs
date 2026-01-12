@@ -262,15 +262,16 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
     }
 
     /// <summary>
-    /// Tests that tools can be enumerated lazily.
+    /// Tests that tools can be listed and iterated.
     /// </summary>
     [Fact]
-    public async Task EnumerateTools_SupportsLazyEnumeration()
+    public async Task ListTools_SupportsIteration()
     {
-        output.WriteLine("=== LAZY TOOL ENUMERATION ===\n");
+        output.WriteLine("=== TOOL ITERATION ===\n");
 
+        var tools = await _client!.ListToolsAsync(cancellationToken: _cts.Token);
         var toolCount = 0;
-        await foreach (var tool in _client!.EnumerateToolsAsync(cancellationToken: _cts.Token))
+        foreach (var tool in tools)
         {
             toolCount++;
             output.WriteLine($"  Discovered: {tool.Name}");
@@ -278,7 +279,7 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
 
         Assert.Equal(ExpectedToolNames.Count, toolCount);
 
-        output.WriteLine($"\n✓ Enumerated {toolCount} tools lazily");
+        output.WriteLine($"\n✓ Iterated {toolCount} tools");
     }
 
     /// <summary>

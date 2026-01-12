@@ -35,7 +35,7 @@ public static partial class ObsSceneTool
     /// </summary>
     /// <param name="action">Action to perform: List, GetCurrent, Set, ListSources</param>
     /// <param name="sceneName">Scene name (required for Set, optional for ListSources - uses current scene if not provided)</param>
-    [McpServerTool(Name = "obs_scene")]
+    [McpServerTool(Name = "obs_scene", Title = "OBS Scene Management")]
     public static partial string Scene(
         SceneAction action,
         [DefaultValue(null)] string? sceneName)
