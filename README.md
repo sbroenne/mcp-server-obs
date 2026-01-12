@@ -1,7 +1,7 @@
 # OBS Studio MCP Server
 
-[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/sbroenne.obs-mcp-server?label=VS%20Code%20Marketplace&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/sbroenne.obs-mcp-server?label=Installs&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/sbroenne.obs-mcp?label=VS%20Code%20Marketplace&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/sbroenne.obs-mcp?label=Installs&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp)
 [![GitHub Downloads](https://img.shields.io/github/downloads/sbroenne/mcp-server-obs/total?label=GitHub%20Downloads&logo=github)](https://github.com/sbroenne/mcp-server-obs/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -29,14 +29,14 @@ Control OBS Studio through AI assistants (GitHub Copilot, Claude, etc.):
 
 Install directly from the VS Code Marketplace:
 
-[![Install in VS Code](https://img.shields.io/badge/VS%20Code-Install%20Extension-blue?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
+[![Install in VS Code](https://img.shields.io/badge/VS%20Code-Install%20Extension-blue?logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp)
 
 1. Open VS Code
 2. Go to Extensions (`Ctrl+Shift+X`)
 3. Search for **"OBS Studio MCP Server"**
 4. Click **Install**
 
-Or run: `code --install-extension sbroenne.obs-mcp-server`
+Or run: `code --install-extension sbroenne.obs-mcp`
 
 ### Other MCP Clients (Claude Desktop, Cursor, Windsurf, etc.)
 
