@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Sbroenne.ObsMcp.McpServer.Prompts;
+using Sbroenne.ObsMcp.McpServer.Resources;
 
 namespace Sbroenne.ObsMcp.McpServer;
 
@@ -32,7 +34,9 @@ public static class Program
                 options.ServerInstructions = ServerInstructions;
             })
             .WithStdioServerTransport()
-            .WithToolsFromAssembly();
+            .WithToolsFromAssembly()
+            .WithPromptsFromAssembly()
+            .WithResourcesFromAssembly();
 
         var app = builder.Build();
         await app.RunAsync();

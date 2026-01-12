@@ -52,7 +52,7 @@ public static partial class ObsAudioTool
     /// <param name="action">Action to perform: GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll</param>
     /// <param name="inputName">Audio input name for Mute/Unmute/GetMuteState/SetVolume/GetVolume actions (e.g., 'Desktop Audio', 'Mic/Aux')</param>
     /// <param name="volume">Volume level for SetVolume action (0.0 = silent, 1.0 = full volume)</param>
-    [McpServerTool(Name = "obs_audio")]
+    [McpServerTool(Name = "obs_audio", Title = "OBS Audio Control", Destructive = true)]
     public static partial string Audio(
         AudioAction action,
         [DefaultValue(null)] string? inputName,

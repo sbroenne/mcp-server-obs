@@ -47,7 +47,7 @@ public static partial class ObsSourceTool
     /// <param name="sceneName">Scene name (optional, uses current scene if not provided)</param>
     /// <param name="windowValue">Window value from ListWindows (required for SetWindowCapture)</param>
     /// <param name="enabled">Whether the source should be visible (required for SetEnabled)</param>
-    [McpServerTool(Name = "obs_source")]
+    [McpServerTool(Name = "obs_source", Title = "OBS Source Management", Destructive = true)]
     public static partial string Source(
         SourceAction action,
         [DefaultValue(null)] string? sourceName,

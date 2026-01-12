@@ -30,7 +30,7 @@ public static partial class ObsStreamingTool
     /// - GetStatus: Get streaming status (active, reconnecting, duration, bytes sent)
     /// </summary>
     /// <param name="action">Action to perform: Start, Stop, GetStatus</param>
-    [McpServerTool(Name = "obs_streaming")]
+    [McpServerTool(Name = "obs_streaming", Title = "OBS Streaming Control", Destructive = true)]
     public static partial string Streaming(
         StreamingAction action)
     {

@@ -50,7 +50,7 @@ public static partial class ObsConnectionTool
     /// <param name="host">OBS WebSocket host (default: localhost, or OBS_HOST env var)</param>
     /// <param name="port">OBS WebSocket port (default: 4455, or OBS_PORT env var)</param>
     /// <param name="password">OBS WebSocket password (or OBS_PASSWORD env var)</param>
-    [McpServerTool(Name = "obs_connection")]
+    [McpServerTool(Name = "obs_connection", Title = "OBS Connection", ReadOnly = false)]
     public static partial string Connection(
         ConnectionAction action,
         [DefaultValue(null)] string? host,

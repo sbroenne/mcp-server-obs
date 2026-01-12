@@ -63,7 +63,7 @@ public static partial class ObsRecordingTool
     /// <param name="quality">Quality preset for SetQuality action: Stream, Small, HQ (recommended), Lossless</param>
     /// <param name="path">Output directory path for Start or SetPath actions. Example: 'C:/Videos' or 'D:/Recordings'</param>
     /// <param name="muteAudio">Mute audio when starting recording. Default: true (audio muted). Set to false to record with audio.</param>
-    [McpServerTool(Name = "obs_recording")]
+    [McpServerTool(Name = "obs_recording", Title = "OBS Recording Control", Destructive = true)]
     public static partial string Recording(
         RecordingAction action,
         [DefaultValue(null)] string? format,
