@@ -1,5 +1,10 @@
 # OBS Studio MCP Server
 
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/sbroenne.obs-mcp-server?label=VS%20Code%20Marketplace&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
+[![Installs](https://img.shields.io/visual-studio-marketplace/i/sbroenne.obs-mcp-server?label=Installs&logo=visualstudiocode)](https://marketplace.visualstudio.com/items?itemName=sbroenne.obs-mcp-server)
+[![GitHub Downloads](https://img.shields.io/github/downloads/sbroenne/mcp-server-obs/total?label=GitHub%20Downloads&logo=github)](https://github.com/sbroenne/mcp-server-obs/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A .NET 10 MCP (Model Context Protocol) server for controlling OBS Studio. Use it standalone with any MCP client or via the included VS Code extension.
 
 > ⚠️ **This project is in active development.** APIs and features may change.
