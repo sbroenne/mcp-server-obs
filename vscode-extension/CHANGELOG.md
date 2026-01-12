@@ -5,6 +5,14 @@ All notable changes to the OBS Studio MCP Server VS Code extension will be docum
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.4] - 2026-01-12
+
+### Changed
+- Upgraded from .NET 8 to .NET 10
+- Updated ModelContextProtocol SDK from 0.4.1-preview.1 to 0.5.0-preview.1
+- Updated Microsoft.Extensions packages to 10.0.0
+- Updated System.Text.Json to 10.0.0
+
 ## [0.0.3] - 2025-11-25
 
 ### Changed
