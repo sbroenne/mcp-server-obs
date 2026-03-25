@@ -20,7 +20,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.x
 
     - name: Extract Version
       run: |
@@ -75,7 +75,7 @@ jobs:
         
         | File | Description |
         |------|-------------|
-        | obs-mcp-server-$version.zip | Cross-platform, requires [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0) |
+        | obs-mcp-server-$version.zip | Cross-platform, requires [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) |
         
         ### Available Tools (7 resource-based)
         
@@ -93,7 +93,7 @@ jobs:
         
         ### Installation
         
-        1. Install [.NET 8 Runtime](https://dotnet.microsoft.com/download/dotnet/8.0)
+        1. Install [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
         2. Extract the zip to a folder
         3. Run with ``dotnet Sbroenne.ObsMcp.McpServer.dll`` or add to your MCP client config
         
