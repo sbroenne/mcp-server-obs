@@ -15,7 +15,7 @@
   },
   "homepage": "https://github.com/sbroenne/mcp-server-obs#readme",
   "engines": {
-    "vscode": "^1.106.0"
+    "vscode": "^1.110.0"
   },
   "os": [
     "win32"
@@ -86,11 +86,11 @@
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/node": "^22.19.1",
-    "@types/vscode": "^1.106.1",
+    "@types/node": "^22.19.15",
+    "@types/vscode": "^1.110.0",
     "@vscode/vsce": "^3.7.1",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.0"
+    "typescript-eslint": "^8.57.2"
   }
 }
