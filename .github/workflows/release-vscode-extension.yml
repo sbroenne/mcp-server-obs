@@ -56,7 +56,7 @@ jobs:
 
         # Update package.json version
         cd vscode-extension
-        npm version "$version" --no-git-tag-version
+        npm version "$version" --no-git-tag-version --allow-same-version
 
         # Update CHANGELOG.md - replace the first version number and date
         $date = Get-Date -Format 'yyyy-MM-dd'
