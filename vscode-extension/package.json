@@ -2,7 +2,7 @@
   "name": "obs-mcp",
   "displayName": "OBS Studio MCP Server",
   "description": "OBS Studio automation for AI assistants - control recordings, streaming, scenes, and window capture via Model Context Protocol",
-  "version": "0.0.1",
+  "version": "1.0.4",
   "publisher": "sbroenne",
   "icon": "images/icon.png",
   "license": "MIT",
