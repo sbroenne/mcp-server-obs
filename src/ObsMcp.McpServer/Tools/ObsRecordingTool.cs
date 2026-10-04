@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
@@ -64,7 +65,7 @@ public static partial class ObsRecordingTool
     /// <param name="path">Output directory path for Start or SetPath actions. Example: 'C:/Videos' or 'D:/Recordings'</param>
     /// <param name="muteAudio">Mute audio when starting recording. Default: true (audio muted). Set to false to record with audio.</param>
     [McpServerTool(Name = "obs_recording", Title = "OBS Recording Control", Destructive = true)]
-    public static partial string Recording(
+    public static partial CallToolResult Recording(
         RecordingAction action,
         [DefaultValue(null)] string? format,
         [DefaultValue(null)] string? quality,
@@ -73,7 +74,7 @@ public static partial class ObsRecordingTool
     {
         try
         {
-            return action switch
+            return ObsToolResult.FromText(action switch
             {
                 RecordingAction.Start => DoStart(muteAudio, path),
                 RecordingAction.Stop => DoStop(),
@@ -86,11 +87,11 @@ public static partial class ObsRecordingTool
                 RecordingAction.SetPath => DoSetPath(path),
                 RecordingAction.GetPath => DoGetPath(),
                 _ => $"Error: Unknown action '{action}'"
-            };
+            });
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            return ObsToolResult.FromText($"Error: {ex.Message}");
         }
     }
 

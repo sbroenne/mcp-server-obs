@@ -1,8 +1,8 @@
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Sbroenne.ObsMcp.McpServer.Prompts;
-using Sbroenne.ObsMcp.McpServer.Resources;
+using Sbroenne.ObsMcp.McpServer.Tools;
 
 namespace Sbroenne.ObsMcp.McpServer;
 
@@ -11,35 +11,52 @@ namespace Sbroenne.ObsMcp.McpServer;
 /// </summary>
 public static class Program
 {
+    public static string ServerVersion { get; } = typeof(Program).Assembly
+        .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
+        .InformationalVersion.Split('+')[0];
+
     public static async Task Main(string[] args)
     {
         var builder = Host.CreateApplicationBuilder(args);
 
         // Configure logging to stderr for MCP protocol compliance
         // (stdout is reserved for JSON-RPC messages)
+        builder.Logging.ClearProviders();
         builder.Logging.AddConsole(consoleLogOptions =>
         {
             consoleLogOptions.LogToStandardErrorThreshold = LogLevel.Trace;
         });
 
-        builder.Services
+        ConfigureServer(builder.Services)
+            .WithStdioServerTransport();
+
+        using var app = builder.Build();
+        try
+        {
+            await app.RunAsync();
+        }
+        finally
+        {
+            ObsConnectionTool.DisconnectClient();
+        }
+    }
+
+    public static IMcpServerBuilder ConfigureServer(IServiceCollection services)
+    {
+        return services
             .AddMcpServer(options =>
             {
                 options.ServerInfo = new()
                 {
                     Name = "obs-mcp-server",
-                    Version = "1.0.0"
+                    Version = ServerVersion
                 };
 
                 options.ServerInstructions = ServerInstructions;
             })
-            .WithStdioServerTransport()
-            .WithToolsFromAssembly()
-            .WithPromptsFromAssembly()
-            .WithResourcesFromAssembly();
-
-        var app = builder.Build();
-        await app.RunAsync();
+            .WithToolsFromAssembly(typeof(Program).Assembly)
+            .WithPromptsFromAssembly(typeof(Program).Assembly)
+            .WithResourcesFromAssembly(typeof(Program).Assembly);
     }
 
     private const string ServerInstructions = """
@@ -55,7 +72,7 @@ public static class Program
             - `obs_scene` - List, GetCurrent, Set, ListSources
             - `obs_source` - AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled
             - `obs_audio` - GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll
-            - `obs_media` - SaveScreenshot, StartVirtualCamera, StopVirtualCamera
+            - `obs_media` - SaveScreenshot
             
             ## IMPORTANT: Audio is MUTED by Default
             

@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
+using Newtonsoft.Json.Linq;
+using OBSWebsocketDotNet;
 using Sbroenne.ObsMcp.McpServer.Tools;
 using Xunit;
 using Xunit.Abstractions;
@@ -49,15 +51,10 @@ public class ObsIntegrationTests : IAsyncLifetime, IAsyncDisposable
         var services = new ServiceCollection();
         services.AddLogging(builder => builder.AddDebug().SetMinimumLevel(LogLevel.Debug));
 
-        services
-            .AddMcpServer(options =>
-            {
-                options.ServerInfo = new() { Name = "obs-mcp-server-test", Version = "1.0.0" };
-            })
+        Program.ConfigureServer(services)
             .WithStreamServerTransport(
                 _clientToServerPipe.Reader.AsStream(),
-                _serverToClientPipe.Writer.AsStream())
-            .WithToolsFromAssembly(typeof(ObsConnectionTool).Assembly);
+                _serverToClientPipe.Writer.AsStream());
 
         _serviceProvider = services.BuildServiceProvider(validateScopes: true);
         _server = _serviceProvider.GetRequiredService<Server.McpServer>();
@@ -132,6 +129,7 @@ public class ObsIntegrationTests : IAsyncLifetime, IAsyncDisposable
     {
         var result = await _client!.CallToolAsync(toolName, args, cancellationToken: _cts.Token);
         var textBlock = result.Content.OfType<TextContentBlock>().FirstOrDefault();
+        Assert.False(result.IsError, $"OBS tool '{toolName}' failed: {textBlock?.Text}");
         return textBlock?.Text ?? "";
     }
 
@@ -210,6 +208,37 @@ public class ObsIntegrationTests : IAsyncLifetime, IAsyncDisposable
 
         _output.WriteLine($"Recording GetSettings result: {result}");
         Assert.DoesNotContain("Error", result);
+        var format = result.Split('\n').Single(line => line.StartsWith("Format: ", StringComparison.Ordinal))["Format: ".Length..];
+        Assert.False(string.IsNullOrWhiteSpace(format), "OBS recording format must not be empty.");
+        Assert.NotEqual("unknown", format);
+    }
+
+    [Fact]
+    public async Task Recording_SetFormat_UpdatesTheActualObsSetting()
+    {
+        var websocket = new OBSWebsocket();
+        using var diagnostics = new ObsClient(websocket);
+        diagnostics.Connect("localhost", 4455, Environment.GetEnvironmentVariable("OBS_PASSWORD"));
+        var modernSetting = websocket.GetProfileParameter("SimpleOutput", "RecFormat2");
+        var modernFormat = modernSetting["parameterValue"]?.Value<string>()
+            ?? modernSetting["defaultParameterValue"]?.Value<string>();
+        var parameterName = !string.IsNullOrEmpty(modernFormat) ? "RecFormat2" : "RecFormat";
+        var originalSetting = websocket.GetProfileParameter("SimpleOutput", parameterName);
+        var originalFormat = originalSetting["parameterValue"]?.Value<string>()
+            ?? originalSetting["defaultParameterValue"]?.Value<string>();
+        Assert.False(string.IsNullOrWhiteSpace(originalFormat), "OBS must have an effective recording format before this test.");
+
+        try
+        {
+            await CallToolAsync("obs_recording", new() { ["action"] = "SetFormat", ["format"] = "mkv" });
+
+            var updatedSetting = websocket.GetProfileParameter("SimpleOutput", parameterName);
+            Assert.Equal("mkv", updatedSetting["parameterValue"]?.Value<string>());
+        }
+        finally
+        {
+            websocket.SetProfileParameter("SimpleOutput", parameterName, originalFormat);
+        }
     }
 
     [Fact]
@@ -592,22 +621,6 @@ public class ObsIntegrationTests : IAsyncLifetime, IAsyncDisposable
         {
             if (File.Exists(tempPath)) File.Delete(tempPath);
         }
-    }
-
-    [Fact]
-    public async Task Media_VirtualCamera_StartStop_Works()
-    {
-        // Start virtual camera
-        var startResult = await CallToolAsync("obs_media", new() { ["action"] = "StartVirtualCamera" });
-        _output.WriteLine($"StartVirtualCamera result: {startResult}");
-        Assert.DoesNotContain("Error", startResult);
-
-        await Task.Delay(500);
-
-        // Stop virtual camera
-        var stopResult = await CallToolAsync("obs_media", new() { ["action"] = "StopVirtualCamera" });
-        _output.WriteLine($"StopVirtualCamera result: {stopResult}");
-        Assert.DoesNotContain("Error", stopResult);
     }
 
     #endregion

@@ -12,7 +12,6 @@ A .NET 10 MCP (Model Context Protocol) server for controlling OBS Studio. This s
 - Manage scenes and sources
 - Window capture with programmatic window selection
 - Screenshot capture
-- Virtual camera control
 
 ## Building
 
@@ -49,9 +48,9 @@ You can use this MCP server with any MCP-compatible client (Claude Desktop, VS C
 | Windsurf | `~/.codeium/windsurf/mcp_config.json` |
 | Other MCP clients | Check your client's documentation |
 
-### mcp.json Configuration
+### VS Code mcp.json Configuration
 
-The configuration format is the same across all MCP-compatible clients. The `inputs` section prompts you for configurable values when the server starts:
+VS Code supports the `servers` and `inputs` sections below. Claude Desktop, Cursor, and Windsurf use `mcpServers`; see the repository README for that configuration. In VS Code, `inputs` prompts you for configurable values when the server starts:
 
 | Input ID | Description |
 |----------|-------------|
@@ -92,6 +91,8 @@ The configuration format is the same across all MCP-compatible clients. The `inp
 
 #### Option 2: Using dotnet run (Development)
 
+Build the project before using this configuration. `--no-build` prevents build output from interfering with MCP messages.
+
 ```json
 {
   "inputs": [
@@ -112,6 +113,8 @@ The configuration format is the same across all MCP-compatible clients. The `inp
       "command": "dotnet",
       "args": [
         "run",
+        "--no-build",
+        "--no-launch-profile",
         "--project",
         "${input:obs-project-path}/src/ObsMcp.McpServer/ObsMcp.McpServer.csproj"
       ],
@@ -142,20 +145,23 @@ The server supports the following environment variables for connection configura
 These can be set:
 - In the `env` block of your `mcp.json` configuration (recommended)
 - As system environment variables
-- Passed directly to `obs_connect` tool (overrides environment variables)
+- Passed directly to `obs_connection(action: Connect)` (overrides environment variables)
 
 ## Available Tools
 
-The server provides 6 resource-based tools with action enums:
+The server provides 7 resource-based tools with action enums:
 
 | Tool | Actions | Description |
 |------|---------|-------------|
 | `obs_connection` | `Connect`, `Disconnect`, `GetStatus`, `GetStats` | Connection management |
-| `obs_recording` | `Start`, `Stop`, `Pause`, `Resume`, `GetStatus`, `GetSettings`, `SetFormat`, `SetQuality` | Recording control |
+| `obs_recording` | `Start`, `Stop`, `Pause`, `Resume`, `GetStatus`, `GetSettings`, `SetFormat`, `SetQuality`, `SetPath`, `GetPath` | Recording control |
 | `obs_streaming` | `Start`, `Stop`, `GetStatus` | Streaming control |
 | `obs_scene` | `List`, `GetCurrent`, `Set`, `ListSources` | Scene management |
 | `obs_source` | `AddWindowCapture`, `ListWindows`, `SetWindowCapture`, `Remove`, `SetEnabled` | Source management |
-| `obs_media` | `SaveScreenshot`, `StartVirtualCamera`, `StopVirtualCamera` | Media operations |
+| `obs_audio` | `GetInputs`, `Mute`, `Unmute`, `GetMuteState`, `SetVolume`, `GetVolume`, `MuteAll`, `UnmuteAll` | Audio control |
+| `obs_media` | `SaveScreenshot` | Screenshots |
+
+The server uses MCP SDK 2.2.0 and supports MCP revision `2026-07-28` as well as earlier initialization-handshake clients. Tool failures retain their `Error: ...` text and return `isError: true`. Prompts and Markdown guide resources are also available through MCP.
 
 ## Window Capture Workflow
 
@@ -213,14 +219,16 @@ ObsMcp.McpServer/
 │   ├── ObsStreamingTool.cs    # obs_streaming tool (Start, Stop, GetStatus)
 │   ├── ObsSceneTool.cs        # obs_scene tool (List, GetCurrent, Set, ListSources)
 │   ├── ObsSourceTool.cs       # obs_source tool (AddWindowCapture, ListWindows, etc.)
-│   └── ObsMediaTool.cs        # obs_media tool (SaveScreenshot, VirtualCamera)
+│   ├── ObsAudioTool.cs        # obs_audio tool (Mute, Unmute, SetVolume, etc.)
+│   ├── ObsToolResult.cs       # MCP success/error response formatting
+│   └── ObsMediaTool.cs        # obs_media tool (SaveScreenshot)
 └── README.md                  # This file
 ```
 
 ## Dependencies
 
-- [ModelContextProtocol](https://www.nuget.org/packages/ModelContextProtocol) - MCP SDK for .NET
-- [obs-websocket-dotnet](https://www.nuget.org/packages/obs-websocket-dotnet) - OBS WebSocket client
+- [ModelContextProtocol](https://www.nuget.org/packages/ModelContextProtocol) 2.2.0 - MCP SDK for .NET
+- [obs-websocket-dotnet](https://www.nuget.org/packages/obs-websocket-dotnet) 5.7.0 - OBS WebSocket client
 
 ## License
 

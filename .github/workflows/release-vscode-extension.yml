@@ -17,15 +17,15 @@ jobs:
       pull-requests: write
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
-        node-version: '22'
+        node-version: '24'
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.0.x
 
@@ -63,7 +63,8 @@ jobs:
         $changelogPath = 'CHANGELOG.md'
         if (Test-Path $changelogPath) {
           $changelogContent = Get-Content $changelogPath -Raw
-          $changelogContent = $changelogContent -replace '(?m)^## \[\d+\.\d+\.\d+\] - \d{4}-\d{2}-\d{2}', "## [$version] - $date"
+          $releaseHeading = [regex]::new('(?m)^## \[(?:Unreleased|\d+\.\d+\.\d+)\](?: - \d{4}-\d{2}-\d{2})?')
+          $changelogContent = $releaseHeading.Replace($changelogContent, "## [$version] - $date", 1)
           Set-Content $changelogPath $changelogContent
         }
 
@@ -74,12 +75,19 @@ jobs:
     - name: Install Dependencies
       run: |
         cd vscode-extension
-        npm install
+        npm ci
+
+    - name: Run Tests
+      run: |
+        dotnet test --filter "Category!=Integration"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        cd vscode-extension
+        npm test
 
     - name: Build and Package Extension
       run: |
         cd vscode-extension
-        # Run the package script which does: build:mcp-server + vsce package
+        # vsce runs vscode:prepublish to publish the server and compile the extension
         npm run package
 
         $version = "${{ env.PACKAGE_VERSION }}"
@@ -133,12 +141,12 @@ jobs:
         $notes += "- Zero Configuration - Automatic MCP server registration`n"
         $notes += "- Control recordings, streaming, and scenes`n"
         $notes += "- Window and display capture management`n"
-        $notes += "- Screenshot and virtual camera support`n"
+        $notes += "- Screenshot support`n"
         $notes += "- Works in all VS Code workspaces`n`n"
         $notes += "### Requirements`n"
         $notes += "- Windows OS`n"
         $notes += "- OBS Studio with WebSocket server enabled`n"
-        $notes += "- VS Code 1.106.0+`n`n"
+        $notes += "- VS Code 1.110.0+`n`n"
         $notes += "### Documentation`n"
         $notes += "- [Main Repository](https://github.com/sbroenne/mcp-server-obs)`n"
 

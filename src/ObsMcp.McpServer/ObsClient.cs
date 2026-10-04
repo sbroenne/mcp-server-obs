@@ -8,12 +8,17 @@ namespace Sbroenne.ObsMcp.McpServer;
 /// </summary>
 public class ObsClient : IDisposable
 {
-    private readonly OBSWebsocket _obs;
+    private readonly IOBSWebsocket _obs;
     private bool _disposed;
 
-    public ObsClient()
+    public ObsClient() : this(new OBSWebsocket())
     {
-        _obs = new OBSWebsocket();
+    }
+
+    public ObsClient(IOBSWebsocket obs)
+    {
+        ArgumentNullException.ThrowIfNull(obs);
+        _obs = obs;
     }
 
     public bool IsConnected => _obs.IsConnected;
@@ -21,14 +26,12 @@ public class ObsClient : IDisposable
     public void Connect(string host, int port, string? password)
     {
         var url = $"ws://{host}:{port}";
-        var connected = new ManualResetEventSlim(false);
-        var error = (string?)null;
+        var connected = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-        EventHandler connectedHandler = (_, _) => connected.Set();
+        EventHandler connectedHandler = (_, _) => connected.TrySetResult(null);
         EventHandler<OBSWebsocketDotNet.Communication.ObsDisconnectionInfo> disconnectedHandler = (_, e) =>
         {
-            error = e.DisconnectReason ?? $"CloseCode: {e.ObsCloseCode}";
-            connected.Set();
+            connected.TrySetResult(e.DisconnectReason ?? $"CloseCode: {e.ObsCloseCode}");
         };
 
         _obs.Connected += connectedHandler;
@@ -38,9 +41,15 @@ public class ObsClient : IDisposable
         {
             _obs.ConnectAsync(url, password ?? "");
 
-            if (!connected.Wait(TimeSpan.FromSeconds(10)))
+            string? error;
+            try
             {
-                throw new InvalidOperationException("Connection timed out");
+                error = connected.Task.WaitAsync(TimeSpan.FromSeconds(10)).GetAwaiter().GetResult();
+            }
+            catch (TimeoutException ex)
+            {
+                _obs.Disconnect();
+                throw new InvalidOperationException("Connection timed out", ex);
             }
 
             if (error != null)
@@ -272,10 +281,6 @@ public class ObsClient : IDisposable
         _obs.SaveSourceScreenshot(scene, imageFormat, filePath, w, h, q);
     }
 
-    // Virtual camera
-    public void StartVirtualCamera() => _obs.StartVirtualCam();
-    public void StopVirtualCamera() => _obs.StopVirtualCam();
-
     // Performance stats
     public ObsPerformanceStats GetStats()
     {
@@ -352,23 +357,34 @@ public class ObsClient : IDisposable
     // Recording settings
     public ObsRecordingSettings GetRecordingSettings()
     {
-        var format = _obs.GetProfileParameter("SimpleOutput", "RecFormat") as JObject;
-        var quality = _obs.GetProfileParameter("SimpleOutput", "RecQuality") as JObject;
-        var encoder = _obs.GetProfileParameter("SimpleOutput", "RecEncoder") as JObject;
-        var path = _obs.GetProfileParameter("SimpleOutput", "FilePath") as JObject;
-
         return new ObsRecordingSettings
         {
-            Format = format?["parameterValue"]?.ToString() ?? "unknown",
-            Quality = quality?["parameterValue"]?.ToString() ?? "unknown",
-            Encoder = encoder?["parameterValue"]?.ToString() ?? "unknown",
-            Path = path?["parameterValue"]?.ToString() ?? ""
+            Format = GetRecordingFormatParameter().Value ?? "unknown",
+            Quality = GetProfileParameterValue("RecQuality") ?? "unknown",
+            Encoder = GetProfileParameterValue("RecEncoder") ?? "unknown",
+            Path = GetProfileParameterValue("FilePath") ?? ""
         };
+    }
+
+    private string? GetProfileParameterValue(string parameterName)
+    {
+        var parameter = _obs.GetProfileParameter("SimpleOutput", parameterName)
+            ?? throw new InvalidOperationException($"OBS returned an invalid recording setting for '{parameterName}'.");
+        return parameter["parameterValue"]?.Value<string>()
+            ?? parameter["defaultParameterValue"]?.Value<string>();
+    }
+
+    private (string Name, string? Value) GetRecordingFormatParameter()
+    {
+        var format = GetProfileParameterValue("RecFormat2");
+        return !string.IsNullOrEmpty(format)
+            ? ("RecFormat2", format)
+            : ("RecFormat", GetProfileParameterValue("RecFormat"));
     }
 
     public void SetRecordingFormat(string format)
     {
-        _obs.SetProfileParameter("SimpleOutput", "RecFormat", format);
+        _obs.SetProfileParameter("SimpleOutput", GetRecordingFormatParameter().Name, format);
     }
 
     public void SetRecordingQuality(string quality)
@@ -378,17 +394,12 @@ public class ObsClient : IDisposable
 
     public string GetRecordingDirectory()
     {
-        var response = _obs.SendRequest("GetRecordDirectory");
-        return response?["recordDirectory"]?.Value<string>() ?? "unknown";
+        return _obs.GetRecordDirectory();
     }
 
     public void SetRecordingDirectory(string directory)
     {
-        var requestData = new JObject
-        {
-            ["recordDirectory"] = directory
-        };
-        _obs.SendRequest("SetRecordDirectory", requestData);
+        _obs.SetRecordDirectory(directory);
     }
 
     public void Dispose()

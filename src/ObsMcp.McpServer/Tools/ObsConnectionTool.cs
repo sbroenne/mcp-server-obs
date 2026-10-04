@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
@@ -51,7 +52,7 @@ public static partial class ObsConnectionTool
     /// <param name="port">OBS WebSocket port (default: 4455, or OBS_PORT env var)</param>
     /// <param name="password">OBS WebSocket password (or OBS_PASSWORD env var)</param>
     [McpServerTool(Name = "obs_connection", Title = "OBS Connection", ReadOnly = false)]
-    public static partial string Connection(
+    public static partial CallToolResult Connection(
         ConnectionAction action,
         [DefaultValue(null)] string? host,
         [DefaultValue(null)] int? port,
@@ -59,39 +60,66 @@ public static partial class ObsConnectionTool
     {
         try
         {
-            return action switch
+            return ObsToolResult.FromText(action switch
             {
                 ConnectionAction.Connect => DoConnect(host, port, password),
                 ConnectionAction.Disconnect => DoDisconnect(),
                 ConnectionAction.GetStatus => DoGetStatus(),
                 ConnectionAction.GetStats => DoGetStats(),
                 _ => $"Error: Unknown action '{action}'"
-            };
+            });
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            return ObsToolResult.FromText($"Error: {ex.Message}");
         }
     }
 
     private static string DoConnect(string? host, int? port, string? password)
     {
         var h = host ?? Environment.GetEnvironmentVariable("OBS_HOST") ?? "localhost";
-        var p = port ?? int.Parse(Environment.GetEnvironmentVariable("OBS_PORT") ?? "4455");
+        var portText = Environment.GetEnvironmentVariable("OBS_PORT") ?? "4455";
+        if (!port.HasValue && !int.TryParse(portText, out _))
+        {
+            return "Error: OBS_PORT must be an integer between 1 and 65535";
+        }
+        var p = port ?? int.Parse(portText);
+        if (p is < 1 or > 65535)
+        {
+            return "Error: port must be between 1 and 65535";
+        }
+        if (string.IsNullOrWhiteSpace(h))
+        {
+            return "Error: host must not be empty";
+        }
         var pw = password ?? Environment.GetEnvironmentVariable("OBS_PASSWORD");
 
-        _client?.Dispose();
-        _client = new ObsClient();
-        _client.Connect(h, p, pw);
+        DisconnectClient();
+        var client = new ObsClient();
+        try
+        {
+            client.Connect(h, p, pw);
+            _client = client;
+        }
+        catch
+        {
+            client.Dispose();
+            throw;
+        }
 
         return $"Connected to OBS at {h}:{p}";
     }
 
     private static string DoDisconnect()
     {
+        DisconnectClient();
+        return "Disconnected from OBS";
+    }
+
+    internal static void DisconnectClient()
+    {
         _client?.Dispose();
         _client = null;
-        return "Disconnected from OBS";
     }
 
     private static string DoGetStatus()
