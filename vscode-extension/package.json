@@ -90,7 +90,7 @@
     "@types/node": "^22.19.15",
     "@types/vscode": "^1.110.0",
     "@vscode/vsce": "^3.9.2",
-    "eslint": "^10.7.0",
+    "eslint": "^10.11.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2"
   }
