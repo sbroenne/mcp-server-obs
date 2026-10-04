@@ -150,8 +150,6 @@ public static class ObsResources
             | Action | Description |
             |--------|-------------|
             | SaveScreenshot | Save screenshot to file |
-            | StartVirtualCamera | Start virtual camera |
-            | StopVirtualCamera | Stop virtual camera |
             """;
     }
 

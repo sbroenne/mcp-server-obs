@@ -1,3 +1,4 @@
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
@@ -31,22 +32,22 @@ public static partial class ObsStreamingTool
     /// </summary>
     /// <param name="action">Action to perform: Start, Stop, GetStatus</param>
     [McpServerTool(Name = "obs_streaming", Title = "OBS Streaming Control", Destructive = true)]
-    public static partial string Streaming(
+    public static partial CallToolResult Streaming(
         StreamingAction action)
     {
         try
         {
-            return action switch
+            return ObsToolResult.FromText(action switch
             {
                 StreamingAction.Start => DoStart(),
                 StreamingAction.Stop => DoStop(),
                 StreamingAction.GetStatus => DoGetStatus(),
                 _ => $"Error: Unknown action '{action}'"
-            };
+            });
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            return ObsToolResult.FromText($"Error: {ex.Message}");
         }
     }
 

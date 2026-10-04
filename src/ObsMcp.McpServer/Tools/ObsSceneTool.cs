@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
@@ -36,24 +37,24 @@ public static partial class ObsSceneTool
     /// <param name="action">Action to perform: List, GetCurrent, Set, ListSources</param>
     /// <param name="sceneName">Scene name (required for Set, optional for ListSources - uses current scene if not provided)</param>
     [McpServerTool(Name = "obs_scene", Title = "OBS Scene Management")]
-    public static partial string Scene(
+    public static partial CallToolResult Scene(
         SceneAction action,
         [DefaultValue(null)] string? sceneName)
     {
         try
         {
-            return action switch
+            return ObsToolResult.FromText(action switch
             {
                 SceneAction.List => DoList(),
                 SceneAction.GetCurrent => DoGetCurrent(),
                 SceneAction.Set => DoSet(sceneName),
                 SceneAction.ListSources => DoListSources(sceneName),
                 _ => $"Error: Unknown action '{action}'"
-            };
+            });
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            return ObsToolResult.FromText($"Error: {ex.Message}");
         }
     }
 

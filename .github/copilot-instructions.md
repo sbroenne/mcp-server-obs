@@ -21,8 +21,8 @@ mcp-server-obs/
 ## Key Technologies
 
 - **.NET 10** - MCP server implementation
-- **ModelContextProtocol** NuGet package - MCP SDK for .NET
-- **obs-websocket-dotnet** - OBS WebSocket client library
+- **ModelContextProtocol 2.2.0** NuGet package - MCP SDK for .NET
+- **obs-websocket-dotnet 5.7.0** - OBS WebSocket client library
 - **xUnit** - Unit and integration testing
 - **TypeScript** - VS Code extension only
 
@@ -38,13 +38,14 @@ Tools follow the **resource + action enum** pattern (like mcp-server-excel):
 | `obs_scene` | List, GetCurrent, Set, ListSources |
 | `obs_source` | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
 | `obs_audio` | GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll |
-| `obs_media` | SaveScreenshot, StartVirtualCamera, StopVirtualCamera |
+| `obs_media` | SaveScreenshot |
 
 **Audio Note:** Recording starts with audio MUTED by default. Use `muteAudio=false` to include audio.
 
 Each tool file contains:
 - An `enum` for actions (e.g., `ConnectionAction`)
-- A single `[McpServerTool]` method that switches on the action
+- A single `[McpServerTool]` method that switches on the action and returns `CallToolResult`
+- Responses wrapped with `ObsToolResult.FromText(...)` to preserve text and set `isError` for failures
 - Shared client access via `ObsConnectionTool.GetClient()`
 
 ## Development Commands
@@ -63,14 +64,15 @@ dotnet test --filter "Category!=Integration"
 dotnet test --filter "Category=Integration"
 
 # Publish for VS Code extension
-dotnet publish src/ObsMcp.McpServer -c Release -r win-x64 --self-contained -o vscode-extension/server
+dotnet publish src\ObsMcp.McpServer -c Release -o vscode-extension\bin
 ```
 
 ## Testing
 
 ### Unit Tests
-- Test tool validation logic without OBS connection
-- Located in `tests/ObsMcp.McpServer.Tests/ObsClientTests.cs`
+- Test DTOs and tool validation without an OBS connection
+- Protocol tests use `Program.ConfigureServer` so production and test registration stay consistent
+- `McpStdioCompatibilityTests.cs` launches actual server processes with current and earlier MCP clients
 
 ### Integration Tests
 - Require OBS Studio running with WebSocket enabled
@@ -96,7 +98,7 @@ dotnet publish src/ObsMcp.McpServer -c Release -r win-x64 --self-contained -o vs
 - PascalCase for public members, camelCase for private
 - Each tool in its own file: `Obs{Resource}Tool.cs`
 - Action enums: `{Resource}Action`
-- Handle errors with try/catch, return `"Error: {message}"` strings
+- Handle errors with try/catch, return `ObsToolResult.FromText($"Error: {message}")`
 - Use XML documentation (`///`) for MCP tool and parameter descriptions (SDK auto-extracts these)
 
 ## Adding New Tools
@@ -107,6 +109,7 @@ dotnet publish src/ObsMcp.McpServer -c Release -r win-x64 --self-contained -o vs
    - `/// <summary>` for tool description
    - `/// <param name="...">` for each parameter description
 4. Use `ObsConnectionTool.GetClient()` for OBS access
+   Return `CallToolResult` through `ObsToolResult.FromText(...)` for both success and failure.
 5. Add unit tests in `ObsClientTests.cs`
 6. Add integration tests in `IntegrationTests.cs`
 7. Update `Program.cs` ServerInstructions

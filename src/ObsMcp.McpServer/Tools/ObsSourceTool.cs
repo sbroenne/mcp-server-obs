@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
@@ -48,7 +49,7 @@ public static partial class ObsSourceTool
     /// <param name="windowValue">Window value from ListWindows (required for SetWindowCapture)</param>
     /// <param name="enabled">Whether the source should be visible (required for SetEnabled)</param>
     [McpServerTool(Name = "obs_source", Title = "OBS Source Management", Destructive = true)]
-    public static partial string Source(
+    public static partial CallToolResult Source(
         SourceAction action,
         [DefaultValue(null)] string? sourceName,
         [DefaultValue(null)] string? sceneName,
@@ -57,7 +58,7 @@ public static partial class ObsSourceTool
     {
         try
         {
-            return action switch
+            return ObsToolResult.FromText(action switch
             {
                 SourceAction.AddWindowCapture => DoAddWindowCapture(sourceName, sceneName),
                 SourceAction.ListWindows => DoListWindows(sourceName),
@@ -65,11 +66,11 @@ public static partial class ObsSourceTool
                 SourceAction.Remove => DoRemove(sourceName, sceneName),
                 SourceAction.SetEnabled => DoSetEnabled(sourceName, enabled, sceneName),
                 _ => $"Error: Unknown action '{action}'"
-            };
+            });
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            return ObsToolResult.FromText($"Error: {ex.Message}");
         }
     }
 

@@ -1,5 +1,4 @@
 using System.IO.Pipelines;
-using DotNetEnv;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
@@ -39,15 +38,6 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
     private Task? _serverTask;
 
     /// <summary>
-    /// Static constructor to load .env file once for all tests.
-    /// </summary>
-    static McpServerIntegrationTests()
-    {
-        // Load .env file from project root (searches up from bin directory)
-        Env.TraversePath().Load();
-    }
-
-    /// <summary>
     /// Expected tool names from our assembly - the source of truth.
     /// </summary>
     private static readonly HashSet<string> ExpectedToolNames =
@@ -72,16 +62,10 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
         services.AddLogging(builder => builder.AddDebug().SetMinimumLevel(LogLevel.Debug));
 
         // Add MCP server with tools (same as Program.cs) using stream transport for testing
-        services
-            .AddMcpServer(options =>
-            {
-                options.ServerInfo = new() { Name = "obs-mcp-server", Version = "1.0.0" };
-                options.ServerInstructions = "OBS Studio MCP Server - Test instance for integration tests";
-            })
+        Program.ConfigureServer(services)
             .WithStreamServerTransport(
                 _clientToServerPipe.Reader.AsStream(),
-                _serverToClientPipe.Writer.AsStream())
-            .WithToolsFromAssembly(typeof(ObsConnectionTool).Assembly);
+                _serverToClientPipe.Writer.AsStream());
 
         _serviceProvider = services.BuildServiceProvider(validateScopes: true);
 
@@ -230,7 +214,7 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
 
         Assert.NotNull(serverInfo);
         Assert.Equal("obs-mcp-server", serverInfo.Name);
-        Assert.Equal("1.0.0", serverInfo.Version);
+        Assert.Equal(Program.ServerVersion, serverInfo.Version);
         Assert.NotNull(serverInstructions);
         Assert.Contains("OBS Studio MCP Server", serverInstructions);
 
@@ -254,6 +238,8 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
 
         Assert.NotNull(capabilities);
         Assert.NotNull(capabilities.Tools);
+        Assert.NotNull(capabilities.Prompts);
+        Assert.NotNull(capabilities.Resources);
 
         output.WriteLine($"✓ Tools capability: {capabilities.Tools != null}");
         output.WriteLine($"✓ ListChanged: {capabilities.Tools?.ListChanged}");
@@ -303,6 +289,7 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
         Assert.NotNull(result);
         Assert.NotNull(result.Content);
         Assert.NotEmpty(result.Content);
+        Assert.False(result.IsError);
 
         var textBlock = result.Content.OfType<TextContentBlock>().FirstOrDefault();
         Assert.NotNull(textBlock);
@@ -344,6 +331,7 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
         // Should return validation error
         Assert.Contains("Error", textBlock.Text);
         Assert.Contains("Invalid format", textBlock.Text);
+        Assert.True(result.IsError);
 
         output.WriteLine("\n✓ obs_recording format validation works via MCP protocol");
     }
@@ -375,6 +363,7 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
 
         // Should return error about missing parameter
         Assert.Contains("inputName parameter is required", textBlock.Text);
+        Assert.True(result.IsError);
 
         output.WriteLine("\n✓ obs_audio parameter validation works via MCP protocol");
     }
@@ -406,6 +395,7 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
 
         // Should return error about missing filePath
         Assert.Contains("filePath is required", textBlock.Text);
+        Assert.True(result.IsError);
 
         output.WriteLine("\n✓ obs_media SaveScreenshot filePath validation works via MCP protocol");
     }
@@ -420,7 +410,7 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
     [InlineData("obs_scene", "List", "GetCurrent", "Set", "ListSources")]
     [InlineData("obs_source", "AddWindowCapture", "ListWindows", "SetWindowCapture", "Remove", "SetEnabled")]
     [InlineData("obs_audio", "GetInputs", "Mute", "Unmute", "GetMuteState", "SetVolume", "GetVolume", "MuteAll", "UnmuteAll")]
-    [InlineData("obs_media", "SaveScreenshot", "StartVirtualCamera", "StopVirtualCamera")]
+    [InlineData("obs_media", "SaveScreenshot")]
     public async Task Tool_HasExpectedActions(string toolName, params string[] expectedActions)
     {
         output.WriteLine($"=== VALIDATING {toolName} ACTIONS ===\n");
@@ -431,6 +421,12 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
         Assert.NotNull(tool);
         Assert.NotNull(tool.Description);
 
+        var schema = tool.ProtocolTool.InputSchema;
+        var actionSchema = schema.GetProperty("properties").GetProperty("action");
+        Assert.Equal("string", actionSchema.GetProperty("type").GetString());
+        Assert.Equal(expectedActions, actionSchema.GetProperty("enum").EnumerateArray().Select(value => value.GetString()));
+        Assert.Equal(["action"], schema.GetProperty("required").EnumerateArray().Select(value => value.GetString()));
+
         // Verify each expected action is mentioned in the description
         foreach (var action in expectedActions)
         {
@@ -439,5 +435,101 @@ public class McpServerIntegrationTests(ITestOutputHelper output) : IAsyncLifetim
         }
 
         output.WriteLine($"\n✓ {toolName} has all {expectedActions.Length} expected actions");
+    }
+
+    [Theory]
+    [InlineData("StartVirtualCamera")]
+    [InlineData("StopVirtualCamera")]
+    public async Task CallTool_MediaRejectsRemovedActions(string action)
+    {
+        var result = await _client!.CallToolAsync("obs_media",
+            new Dictionary<string, object?> { ["action"] = action },
+            cancellationToken: _cts.Token);
+
+        Assert.True(result.IsError);
+    }
+
+    [Theory]
+    [InlineData("obs_connection", "GetStats")]
+    [InlineData("obs_recording", "GetStatus")]
+    [InlineData("obs_streaming", "GetStatus")]
+    [InlineData("obs_scene", "GetCurrent")]
+    [InlineData("obs_source", "Remove")]
+    [InlineData("obs_audio", "Mute")]
+    [InlineData("obs_media", "SaveScreenshot")]
+    public async Task CallTool_FailuresAreMarkedAsErrors(string toolName, string action)
+    {
+        var result = await _client!.CallToolAsync(toolName,
+            new Dictionary<string, object?> { ["action"] = action },
+            cancellationToken: _cts.Token);
+
+        Assert.True(result.IsError);
+        var content = Assert.Single(result.Content.OfType<TextContentBlock>());
+        Assert.StartsWith("Error: ", content.Text);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(65536)]
+    public async Task CallTool_ConnectRejectsInvalidPorts(int port)
+    {
+        var result = await _client!.CallToolAsync("obs_connection",
+            new Dictionary<string, object?> { ["action"] = "Connect", ["port"] = port },
+            cancellationToken: _cts.Token);
+
+        Assert.True(result.IsError);
+        Assert.Contains("port must be between 1 and 65535",
+            Assert.Single(result.Content.OfType<TextContentBlock>()).Text);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(" ")]
+    public async Task CallTool_ConnectRejectsEmptyHosts(string host)
+    {
+        var result = await _client!.CallToolAsync("obs_connection",
+            new Dictionary<string, object?> { ["action"] = "Connect", ["host"] = host, ["port"] = 4455 },
+            cancellationToken: _cts.Token);
+
+        Assert.True(result.IsError);
+        Assert.Contains("host must not be empty", Assert.Single(result.Content.OfType<TextContentBlock>()).Text);
+    }
+
+    [Fact]
+    public async Task ListPrompts_ReturnsWorkflowPrompts()
+    {
+        var prompts = await _client!.ListPromptsAsync(cancellationToken: _cts.Token);
+
+        Assert.Equal(
+            ["optimize_settings", "quick_screen_record", "record_window", "troubleshoot_recording"],
+            prompts.Select(prompt => prompt.Name).Order());
+    }
+
+    [Fact]
+    public async Task GetPrompt_UsesApplicationName()
+    {
+        var prompt = await _client!.GetPromptAsync("record_window",
+            new Dictionary<string, object?> { ["applicationName"] = "VS Code" },
+            cancellationToken: _cts.Token);
+
+        var message = Assert.Single(prompt.Messages);
+        var content = Assert.IsType<TextContentBlock>(message.Content);
+        Assert.Contains("the VS Code window", content.Text);
+    }
+
+    [Theory]
+    [InlineData("obs://guides/recording-best-practices", "OBS Recording Best Practices")]
+    [InlineData("obs://guides/command-reference", "OBS MCP Command Quick Reference")]
+    [InlineData("obs://guides/error-recovery", "OBS Error Recovery Guide")]
+    public async Task ReadResource_ReturnsMarkdownGuide(string uri, string title)
+    {
+        var resources = await _client!.ListResourcesAsync(cancellationToken: _cts.Token);
+        Assert.Contains(resources, resource => resource.Uri == uri);
+
+        var result = await _client.ReadResourceAsync(uri, cancellationToken: _cts.Token);
+        var content = Assert.IsType<TextResourceContents>(Assert.Single(result.Contents));
+        Assert.Equal("text/markdown", content.MimeType);
+        Assert.Contains(title, content.Text);
     }
 }

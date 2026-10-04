@@ -2,7 +2,7 @@
   "name": "obs-mcp",
   "displayName": "OBS Studio MCP Server",
   "description": "OBS Studio automation for AI assistants - control recordings, streaming, scenes, and window capture via Model Context Protocol",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "publisher": "sbroenne",
   "icon": "images/icon.png",
   "license": "MIT",
@@ -77,12 +77,13 @@
     }
   },
   "scripts": {
-    "clean": "cd .. && dotnet clean src/ObsMcp.McpServer/ObsMcp.McpServer.csproj -c Release || true",
-    "build:mcp-server": "npm run clean && cd .. && dotnet publish src/ObsMcp.McpServer/ObsMcp.McpServer.csproj -c Release -o vscode-extension/bin --verbosity minimal",
+    "clean": "dotnet clean ..\\src\\ObsMcp.McpServer\\ObsMcp.McpServer.csproj -c Release",
+    "build:mcp-server": "dotnet publish ..\\src\\ObsMcp.McpServer\\ObsMcp.McpServer.csproj -c Release -o bin --verbosity minimal",
     "vscode:prepublish": "npm run build:mcp-server && npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "package": "npm run build:mcp-server && vsce package",
+    "package": "vsce package",
+    "test": "npm run compile && node --test test\\extension.test.cjs",
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {

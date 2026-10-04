@@ -11,6 +11,15 @@ A .NET 10 MCP (Model Context Protocol) server for controlling OBS Studio. Use it
 
 > **Platform:** Windows only (OBS WebSocket limitation)
 
+## Runtime and MCP Compatibility
+
+- Uses .NET 10 with the stable MCP C# SDK 2.2.0 and OBS WebSocket library 5.7.0.
+- Supports the current MCP revision (`2026-07-28`) and earlier clients using the initialization handshake.
+- Preserves all seven tool names and audio-muted-by-default recording behavior.
+- Failed tool calls include the existing error message and set the MCP `isError` flag.
+- Recording format settings use the current OBS setting (`RecFormat2`) with compatibility for older OBS versions.
+- The VS Code extension acquires .NET 10 automatically and uses that runtime to start the bundled server.
+
 ## Features
 
 Control OBS Studio through AI assistants (GitHub Copilot, Claude, etc.):
@@ -21,7 +30,7 @@ Control OBS Studio through AI assistants (GitHub Copilot, Claude, etc.):
 - **Sources**: Add window captures, manage visibility
 - **Audio**: Mute/unmute inputs, control volume (desktop audio, mic)
 - **Window Capture**: Programmatically select windows to record
-- **Media**: Screenshots, virtual camera
+- **Media**: Screenshots
 
 ## Installation
 
@@ -46,7 +55,7 @@ Download from [GitHub Releases](https://github.com/sbroenne/mcp-server-obs/relea
 |----------|-------------|
 | `obs-mcp-server-*.zip` | Requires [.NET 10 Runtime](https://dotnet.microsoft.com/download/dotnet/10.0) |
 
-Extract and add to your MCP client config:
+Extract and add to your MCP client config. For VS Code, use the following `mcp.json` format:
 
 ```json
 {
@@ -91,6 +100,26 @@ Extract and add to your MCP client config:
 | Cursor | `~/.cursor/mcp.json` |
 | Windsurf | `~/.codeium/windsurf/mcp_config.json` |
 
+Claude Desktop, Cursor, and Windsurf use `mcpServers` rather than VS Code's `servers` and `inputs` format. For example:
+
+```json
+{
+  "mcpServers": {
+    "obs": {
+      "command": "dotnet",
+      "args": ["C:\\Tools\\obs-mcp-server\\Sbroenne.ObsMcp.McpServer.dll"],
+      "env": {
+        "OBS_HOST": "localhost",
+        "OBS_PORT": "4455",
+        "OBS_PASSWORD": "your-obs-websocket-password"
+      }
+    }
+  }
+}
+```
+
+Keep configurations containing passwords private and out of source control.
+
 ## Prerequisites
 
 1. **OBS Studio** - Download from [obsproject.com](https://obsproject.com/)
@@ -114,7 +143,7 @@ Extract and add to your MCP client config:
 | `obs_scene` | List, GetCurrent, Set, ListSources |
 | `obs_source` | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
 | `obs_audio` | GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll |
-| `obs_media` | SaveScreenshot, StartVirtualCamera, StopVirtualCamera |
+| `obs_media` | SaveScreenshot |
 
 > **Note:** Recording starts with audio **muted** by default. Use `muteAudio=false` to include audio.
 
@@ -134,6 +163,8 @@ Or just ask your AI assistant: *"Record VS Code in OBS"*
 
 ### Build & Test
 
+Use the .NET 10 SDK. `global.json` accepts stable .NET 10 SDK updates without switching to a newer major version.
+
 ```powershell
 # Build
 dotnet build
@@ -143,7 +174,15 @@ dotnet test --filter "Category!=Integration"
 
 # Run integration tests (requires OBS with .env configured)
 dotnet test --filter "Category=Integration"
+
+# Compile and test the VS Code wrapper
+npm ci --prefix vscode-extension
+npm test --prefix vscode-extension
 ```
+
+The tests that do not require OBS cover tool schemas, failures, prompts, resources, and actual server processes with current and earlier MCP clients. The OBS integration tests require a running OBS instance and fail if it is unavailable.
+
+Pull requests run the server build, tests, standalone publish, and VS Code packaging on Windows. Dependabot checks NuGet, npm, and GitHub Actions updates weekly.
 
 ### Project Structure
 

@@ -7,11 +7,14 @@ This MCP server controls OBS Studio for screen recording and streaming.
 | Tool | Actions |
 |------|---------|
 | `obs_connection` | Connect, Disconnect, GetStatus, GetStats |
-| `obs_recording` | Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality |
+| `obs_recording` | Start, Stop, Pause, Resume, GetStatus, GetSettings, SetFormat, SetQuality, SetPath, GetPath |
 | `obs_streaming` | Start, Stop, GetStatus |
 | `obs_scene` | List, GetCurrent, Set, ListSources |
 | `obs_source` | AddWindowCapture, ListWindows, SetWindowCapture, Remove, SetEnabled |
-| `obs_media` | SaveScreenshot, StartVirtualCamera, StopVirtualCamera |
+| `obs_audio` | GetInputs, Mute, Unmute, GetMuteState, SetVolume, GetVolume, MuteAll, UnmuteAll |
+| `obs_media` | SaveScreenshot |
+
+Failed commands return `isError: true` with an `Error: ...` message. Resolve the failure before continuing the workflow.
 
 ## CRITICAL: Prevent Black Screen Recordings
 
@@ -49,7 +52,8 @@ Follow these steps IN ORDER:
 
 ## Recording Control
 
-- `obs_recording(action: Start)` - Begin recording
+- `obs_recording(action: Start)` - Begin recording with audio muted
+- `obs_recording(action: Start, muteAudio: false)` - Begin recording without changing audio input mute states
 - `obs_recording(action: Stop)` - Stop and save
 - `obs_recording(action: Pause)` - Pause recording
 - `obs_recording(action: Resume)` - Resume recording
@@ -60,6 +64,14 @@ Follow these steps IN ORDER:
 - `obs_recording(action: GetSettings)` - View format/quality/encoder
 - `obs_recording(action: SetFormat, format: "mp4")` - mp4, mkv, mov, flv, ts
 - `obs_recording(action: SetQuality, quality: "HQ")` - Stream, Small, HQ, Lossless
+- `obs_recording(action: SetPath, path: "C:/Videos")` - Set output directory
+- `obs_recording(action: GetPath)` - Get current output directory
+
+## Audio Management
+
+- `obs_audio(action: GetInputs)` - List audio inputs
+- `obs_audio(action: MuteAll)` / `obs_audio(action: UnmuteAll)` - Mute or unmute all inputs
+- `obs_audio(action: SetVolume, inputName: "Mic/Aux", volume: 0.5)` - Set input volume
 
 ## Scene Management
 

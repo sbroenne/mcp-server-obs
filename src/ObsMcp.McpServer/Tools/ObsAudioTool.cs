@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
@@ -53,14 +54,14 @@ public static partial class ObsAudioTool
     /// <param name="inputName">Audio input name for Mute/Unmute/GetMuteState/SetVolume/GetVolume actions (e.g., 'Desktop Audio', 'Mic/Aux')</param>
     /// <param name="volume">Volume level for SetVolume action (0.0 = silent, 1.0 = full volume)</param>
     [McpServerTool(Name = "obs_audio", Title = "OBS Audio Control", Destructive = true)]
-    public static partial string Audio(
+    public static partial CallToolResult Audio(
         AudioAction action,
         [DefaultValue(null)] string? inputName,
         [DefaultValue(null)] double? volume)
     {
         try
         {
-            return action switch
+            return ObsToolResult.FromText(action switch
             {
                 AudioAction.GetInputs => DoGetInputs(),
                 AudioAction.Mute => DoMute(inputName),
@@ -71,11 +72,11 @@ public static partial class ObsAudioTool
                 AudioAction.MuteAll => DoMuteAll(),
                 AudioAction.UnmuteAll => DoUnmuteAll(),
                 _ => $"Error: Unknown action '{action}'"
-            };
+            });
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            return ObsToolResult.FromText($"Error: {ex.Message}");
         }
     }
 

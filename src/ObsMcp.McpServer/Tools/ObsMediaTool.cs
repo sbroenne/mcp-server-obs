@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 
 namespace Sbroenne.ObsMcp.McpServer.Tools;
@@ -9,11 +10,7 @@ namespace Sbroenne.ObsMcp.McpServer.Tools;
 public enum MediaAction
 {
     /// <summary>Save a screenshot to a file</summary>
-    SaveScreenshot,
-    /// <summary>Start the virtual camera</summary>
-    StartVirtualCamera,
-    /// <summary>Stop the virtual camera</summary>
-    StopVirtualCamera
+    SaveScreenshot
 }
 
 /// <summary>
@@ -23,14 +20,12 @@ public enum MediaAction
 public static partial class ObsMediaTool
 {
     /// <summary>
-    /// OBS media operations (screenshots, virtual camera).
+    /// Save OBS screenshots to files.
     /// 
     /// Actions:
     /// - SaveScreenshot: Save a screenshot of the current scene or a specific source to a file
-    /// - StartVirtualCamera: Start the OBS virtual camera output
-    /// - StopVirtualCamera: Stop the OBS virtual camera
     /// </summary>
-    /// <param name="action">Action to perform: SaveScreenshot, StartVirtualCamera, StopVirtualCamera</param>
+    /// <param name="action">Action to perform: SaveScreenshot</param>
     /// <param name="filePath">Full file path to save the screenshot (required for SaveScreenshot, e.g., C:/Screenshots/capture.png)</param>
     /// <param name="sourceName">Source name to screenshot (optional, defaults to current scene)</param>
     /// <param name="imageFormat">Screenshot format: png or jpg (default: png)</param>
@@ -38,7 +33,7 @@ public static partial class ObsMediaTool
     /// <param name="height">Screenshot height in pixels (optional, defaults to source resolution)</param>
     /// <param name="quality">Image compression quality 1-100 (optional, for jpg format)</param>
     [McpServerTool(Name = "obs_media", Title = "OBS Media Operations", Destructive = true)]
-    public static partial string Media(
+    public static partial CallToolResult Media(
         MediaAction action,
         [DefaultValue(null)] string? filePath,
         [DefaultValue(null)] string? sourceName,
@@ -49,17 +44,15 @@ public static partial class ObsMediaTool
     {
         try
         {
-            return action switch
+            return ObsToolResult.FromText(action switch
             {
                 MediaAction.SaveScreenshot => DoSaveScreenshot(filePath, sourceName, imageFormat, width, height, quality),
-                MediaAction.StartVirtualCamera => DoStartVirtualCamera(),
-                MediaAction.StopVirtualCamera => DoStopVirtualCamera(),
                 _ => $"Error: Unknown action '{action}'"
-            };
+            });
         }
         catch (Exception ex)
         {
-            return $"Error: {ex.Message}";
+            return ObsToolResult.FromText($"Error: {ex.Message}");
         }
     }
 
@@ -96,17 +89,4 @@ public static partial class ObsMediaTool
         return $"Screenshot saved to: {filePath}";
     }
 
-    private static string DoStartVirtualCamera()
-    {
-        var client = ObsConnectionTool.GetClient();
-        client.StartVirtualCamera();
-        return "Virtual camera started";
-    }
-
-    private static string DoStopVirtualCamera()
-    {
-        var client = ObsConnectionTool.GetClient();
-        client.StopVirtualCamera();
-        return "Virtual camera stopped";
-    }
 }
