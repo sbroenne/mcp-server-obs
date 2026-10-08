@@ -13,7 +13,7 @@ Control OBS Studio recordings, streaming, and scenes directly from VS Code using
 
 - Windows OS
 - [OBS Studio](https://obsproject.com/) with WebSocket server enabled
-- VS Code 1.110.0 or later
+- VS Code 1.138.0 or later
 - GitHub Copilot (or other MCP-compatible AI assistant)
 
 The extension automatically acquires .NET 10 through the .NET Install Tool and uses the acquired runtime to launch the bundled server. If runtime setup fails, it reports the error instead of registering a server that cannot start.
